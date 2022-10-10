@@ -190,7 +190,8 @@ export default {
         "classification_ID" :"Transactional",
         "world_area":"Global",
         "requester":"Karsanbhai Lal",
-        "adjust_SLA":"5"
+        "adjust_SLA":"5",
+        "FY":"FY22"
       },
       {
         "period_ID" :"P10",
@@ -206,7 +207,8 @@ export default {
         "classification_ID" :"Project",
         "world_area":"Global",
         "requester":"Karsanbhai Lal",
-        "adjust_SLA":""
+        "adjust_SLA":"",
+        "FY":"FY22"
       },
       {
         "period_ID" :"",
@@ -222,7 +224,8 @@ export default {
         "classification_ID" :"",
         "world_area":"",
         "requester":"",
-        "adjust_SLA":""
+        "adjust_SLA":"",
+        "FY":""
       }
       ],
       template_headers:{
@@ -240,6 +243,7 @@ export default {
         world_area:"World Area",
         requester:"Requester",
         adjust_SLA:"Non-Functional (No. of Hrs)",
+        FY:"FY"
         
       },
       template_fields:[
@@ -256,7 +260,8 @@ export default {
         "classification_ID",
         "world_area",
         "requester",
-        "adjust_SLA"
+        "adjust_SLA",
+        "FY"
       ]
     };
   },
@@ -311,6 +316,16 @@ export default {
         callBack(sjisData);
       };
       reader.readAsArrayBuffer(file);
+    },
+    getFYID(fy){
+      let id = 0
+      for(let p = 0; p < this.$store.state.fiscalYears[0].length; p++){
+          if(this.$store.state.fiscalYears[0][p].label.toLowerCase() == fy.toLowerCase()){
+            id = this.$store.state.fiscalYears[0][p].id
+            return this.$store.state.fiscalYears[0][p].id
+          }
+      }
+      if(id == 0){this.upload_errors.push(fy + " in FY column is not defined")}
     },
     getPeriodID(period){
       period = period.substr(1,4)
@@ -441,7 +456,7 @@ export default {
                             requester:this.csvBody[ticket][12],
                             ticket_Owner_ID : this.$store.state.userID,
                             ticket_Status_ID : this.$store.state.completedID,
-                            fy_ID: this.$store.state.activeFY.id
+                            fy_ID: this.getFYID(this.csvBody[ticket][14])
                         })
                     })
           )
