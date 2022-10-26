@@ -11,6 +11,7 @@ import JsonCSV from 'vue-json-csv'
 import JsonExcel from 'vue-json-excel'
 import DaySpanVuetify from 'dayspan-vuetify'
 import VueExcelXlsx from "vue-excel-xlsx";
+import VueTour from 'vue-tour'
 
 import 'vuetify/dist/vuetify.min.css'
 import 'material-design-icons-iconfont/dist/material-design-icons.css'
@@ -22,12 +23,15 @@ Vue.component('downloadCsv', JsonCSV);
 Vue.component('downloadExcel', JsonExcel)
 Vue.use(VueExcelXlsx);
 Vue.use(require('vue-chartist'))
+Vue.use(VueTour)
 
 Vue.use(DaySpanVuetify, {
   methods: {
     getDefaultEventColor: () => '#1976d2'
   }
 });
+
+require('vue-tour/dist/vue-tour.css')
 
 const requireComponent = require.context(
   './components',

@@ -1,5 +1,6 @@
 <template>
 <div>
+  <v-tour name="myTour" :steps="steps"></v-tour>
   <v-row class="mx-auto mt-2 mb-6">
     <v-col cols="12">
       <v-card elevation="10">
@@ -20,6 +21,8 @@
                       style="height: 50px !important"
                       outlined
                       no-data-text="No data to display"
+                      @change="getTickets(team_id)"
+                      id="v-step-0"
                   >
                   <template v-slot:selection="{ item }"> 
                       {{item.name}}
@@ -30,13 +33,32 @@
                   </v-autocomplete>
                 </v-col>
                 <v-col cols="4" class="justify-center" style="justify-content:center;display:flex">
-                  <v-btn class="primary mr-5" @click="getTickets(team_id)" :disabled="team_id == 0" height="54">View Dashboard</v-btn>
+                  <!-- <v-btn class="primary mr-5" @click="getTickets(team_id)" :disabled="team_id == 0" height="54">View Dashboard</v-btn> -->
+                   <!--FY Filter-->
+                  <v-select  
+                      id="v-step-1"
+                      :items="$store.state.fiscalYears[0]"
+                      item-value="id"
+                      label="Filter FY"
+                      item-text="label"
+                      required
+                      outlined
+                      :menu-props="{ maxHeight: '400',maxWidth:'400'}"
+                      v-model="filter_fy"
+                      style="height: 50px !important;max-width:300px;float:right;"
+                      no-data-text="No data to display"
+                      class="mr-5"
+                      :disabled="team_id == 0"
+                      @change="getTickets(team_id)"
+                  >
+                </v-select>
                   <OpsDashboardExport
                     :toExport_transactionals="dashboard_transactional"
                     :toExport_projects="dashboard_projects"
-                    :disabled="false"
                     :teamID="team_id"
-                    style="float:right;margin-right:2px"
+                    :disabled="team_id == 0"
+                    class="dashboard"
+                    id="v-step-3"
                   />
 
                 </v-col>
@@ -365,6 +387,7 @@
 
     </v-col>
   </v-row>
+  
   </div>
 </template>
 
@@ -381,7 +404,39 @@ export default {
     return {
       team_id:0,
       filter_period:[],
-      loading:false
+      loading:false,
+      filter_fy:this.$store.state.activeFY.id,
+      attrs: {
+        class: 'mb-6',
+        boilerplate: true,
+        elevation: 2,
+      },
+      steps: [
+          {
+            target: '#v-step-0',  
+            header: {
+              title: 'Get Started',
+            },
+            content: `Select <strong>Team</strong>`,
+            params: {
+              placement: 'top' 
+            }
+          },
+          {
+            target: '#v-step-1', 
+            content: `Select <strong>FY</strong>`,
+            params: {
+              placement: 'top' 
+            }
+          },
+          {
+            target: '#v-step-3', 
+            content: `<strong>Export Dashboard</strong>`,
+            params: {
+              placement: 'top' 
+            }
+          },
+        ]
     };
   },
    computed:{
@@ -391,6 +446,9 @@ export default {
     dashboard_transactional(){
       return this.$store.state.OpsDashboard_Transactionals
     },
+  },
+  mounted: function () {
+      this.$tours['myTour'].start()
   },
   methods:{
     getTickets(teamID){
@@ -402,7 +460,7 @@ export default {
             //Transactional
             for (let t = 0; t < this.$store.state.periods[0].length; t++) {
                transactional_promise.push(
-                  SparrowService.getTicketOpsDashboard(this.$store.state.activeFY.id, this.$store.state.periods[0][t].id, teamID, 1)
+                  SparrowService.getTicketOpsDashboard(this.filter_fy, this.$store.state.periods[0][t].id, teamID, 1)
                   .then(response => {
                      response.data["periodID"] = this.$store.state.periods[0][t].id
                      response.data["period"] = this.$store.state.periods[0][t].abbreviation
@@ -422,7 +480,7 @@ export default {
             //Projects
             for (let t = 0; t < this.$store.state.periods[0].length; t++) {
                project_promise.push(
-                  SparrowService.getTicketOpsDashboard(this.$store.state.activeFY.id, this.$store.state.periods[0][t].id, teamID, 2)
+                  SparrowService.getTicketOpsDashboard(this.filter_fy, this.$store.state.periods[0][t].id, teamID, 2)
                   .then(response => {
                      response.data["periodID"] = this.$store.state.periods[0][t].id
                      response.data["period"] = this.$store.state.periods[0][t].abbreviation
@@ -472,5 +530,9 @@ export default {
 .ct-series-a .ct-slice-donut-solid,
 .ct-series-a .ct-slice-pie {
   fill: #1565c0;
+}
+.dashboard{
+  float:right;
+  margin-right:2px
 }
 </style>
