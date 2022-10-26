@@ -1,7 +1,7 @@
 <template>
   <div>
     <v-row>
-      <v-col cols="5">
+      <v-col cols="4">
         <v-select
             v-model="team_member_id"
             :items="$store.state.users[0]"
@@ -9,6 +9,7 @@
             label="Team Member"
             style="height: 50px !important"
             no-data-text="No data to display"
+            @change="getTickets()"
         >
         <template v-slot:selection="{ item }"> 
             {{item.first_Name}} {{item.last_Name}} 
@@ -31,6 +32,8 @@
             outlined
             :menu-props="{ maxHeight: '400',maxWidth:'400'}"
             multiple
+            :disabled="team_member_id == 0"
+            @change="getTickets()"
         >
           <template v-slot:selection="{item, index }">
                   <span style="margin-right:5px" v-if="index === 0">{{ item.label }}</span>
@@ -43,8 +46,25 @@
           </template>
         </v-select>
       </v-col>
-      <v-col cols="3" class="justify-center" style="justify-content:center;display:flex">
-        <v-btn class="primary mr-5" @click="getTickets()" :disabled="team_member_id == 0" height="54">View Tickets</v-btn>
+      <v-col cols="4" class="justify-center" style="justify-content:center;display:flex">
+        <!--FY Filter-->
+        <v-select  
+            :items="$store.state.fiscalYears[0]"
+            item-value="label"
+            label="Filter FY"
+            item-text="label"
+            required
+            outlined
+            :menu-props="{ maxHeight: '400',maxWidth:'400'}"
+            v-model="filter_fy"
+            style="height: 50px !important;max-width:300px;float:right;"
+            no-data-text="No data to display"
+            class="mr-5"
+            :disabled="team_member_id == 0"
+            @change="getTickets()"
+         >
+      </v-select>
+
         <DynamicExportReport
           :toExport="this.Tickets"
           :disabled="this.Tickets.length==0"
@@ -521,7 +541,8 @@ export default {
       menu3:false,
       dialog_saving:false,
       dialog_saving_text:"",
-      delete_dialog:false
+      delete_dialog:false,
+      filter_fy:this.$store.state.activeFY
     };
   },
   computed:{
@@ -572,7 +593,7 @@ export default {
     getTickets(){
         this.loading=true
         this.Tickets = []
-        SparrowService.getTicketsByUser(this.team_member_id,this.$store.state.activeFY.label).then(response=>{
+        SparrowService.getTicketsByUser(this.team_member_id,this.filter_fy).then(response=>{
           if(this.filter_period.length == 0){
             this.loading = false
             this.Tickets = response.data
