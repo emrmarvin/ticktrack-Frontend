@@ -4,7 +4,7 @@
       <v-col cols="4">
         <v-select
             v-model="team_member_id"
-            :items="$store.state.users[0]"
+            :items="Users"
             item-value="id"
             label="Team Member"
             style="height: 50px !important"
@@ -488,6 +488,9 @@ import DynamicExportReport from  "@/components/Export/DynamicExportReport"
 export default {
   name:"GetTicketByTeamMember",
   components:{TicketsTable,DynamicExportReport},
+  props:{
+    Users:{type:Array},
+  },
   data() {
     return {
       team_member_id:0,
@@ -542,9 +545,16 @@ export default {
       dialog_saving:false,
       dialog_saving_text:"",
       delete_dialog:false,
-      filter_fy:this.$store.state.activeFY
+      filter_fy:this.$store.state.activeFY.label
     };
   },
+  mounted(){
+    
+  },
+  created(){
+    this.filter_fy = this.$store.state.activeFY
+  },
+
   computed:{
     formatStartDate(){
         return this.start_date
@@ -593,7 +603,7 @@ export default {
     getTickets(){
         this.loading=true
         this.Tickets = []
-        SparrowService.getTicketsByUser(this.team_member_id,this.filter_fy).then(response=>{
+        SparrowService.getTicketsByUser(this.team_member_id,this.filter_fy? 'FY23':this.filter_fy).then(response=>{
           if(this.filter_period.length == 0){
             this.loading = false
             this.Tickets = response.data

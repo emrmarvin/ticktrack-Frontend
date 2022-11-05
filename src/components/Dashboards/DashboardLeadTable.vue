@@ -353,7 +353,7 @@
             <v-progress-linear v-if="$store.state.OpsDashboard_Total_Count != $store.state.TeamMember_Count" indeterminate color="yellow darken-2"></v-progress-linear>
             <div style="justify-content:center;display:flex;height:500px;padding-top:150px" v-if="$store.state.OpsDashboard_Total_Count != $store.state.TeamMember_Count">Loading...</div>
             <template>             
-              <GetTicketByTeamMember v-if="$store.state.OpsDashboard_Total_Count == $store.state.TeamMember_Count" />
+              <GetTicketByTeamMember :Users="$store.state.users[0]" v-if="$store.state.OpsDashboard_Total_Count == $store.state.TeamMember_Count" />
             </template>
           </v-list-item-content>
         </v-list-item>

@@ -49,6 +49,7 @@ requireComponent.keys().forEach(fileName => {
   Vue.component(componentName, componentConfig.default || componentConfig)
 })
 
+
 new Vue({
   router,
   store,

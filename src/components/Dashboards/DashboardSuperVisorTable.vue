@@ -376,6 +376,22 @@
       </v-card>
 
     </v-col>
+    <v-col cols="12"  v-if="TeamMembers.length != 0 ">
+      <v-card elevation="10">
+        <v-list-item>
+          <v-list-item-content>
+            <v-list-item-title class="title mb-5">
+              View Ticket/s per Team Member
+            </v-list-item-title>
+            <v-progress-linear v-if="$store.state.OpsDashboard_Total_Count != $store.state.TeamMember_Count" indeterminate color="yellow darken-2"></v-progress-linear>
+            <div style="justify-content:center;display:flex;height:500px;padding-top:150px" v-if="$store.state.OpsDashboard_Total_Count != $store.state.TeamMember_Count">Loading...</div>
+            <template>             
+              <GetTicketByTeamMember :Users="TeamMembers" v-if="TeamMembers.length != 0 " />
+            </template>
+          </v-list-item-content>
+        </v-list-item>
+      </v-card>
+    </v-col>
 
   </v-row>
 </template>
@@ -383,6 +399,7 @@
 <script>
 import DashboardSupervisorPerTeamMember from '@/components/Dashboards/DashboardSupervisorPerTeamMember.vue'
 import SparrowService from '@/services/SparrowService'
+import GetTicketByTeamMember from '@/components/Dashboards/GetTicketByTeamMember.vue'
 export default {
   name: "DashboardSupervisor",
   data() {
@@ -397,7 +414,8 @@ export default {
     };
   },
   components:{
-    DashboardSupervisorPerTeamMember
+    DashboardSupervisorPerTeamMember,
+    GetTicketByTeamMember
   },
   computed:{
     dashboard_projects(){
@@ -420,9 +438,14 @@ export default {
         this.dialog_loading = true
         this.TeamMember_Count=0,
         this.OpsDashboard_Total_Count=1,
+        this.TeamMembers  = []
         SparrowService.getUserByTeam(teamid)
             .then(response => {
                this.TeamMembers = response.data
+              //  this.$store.state.users[0] = []
+              //  console.log("this.TeamMembers",this.TeamMembers)
+              //  this.$store.state.users[0] = this.TeamMembers
+               
                this.TeamMember_Count = response.data.length
                for (let p = 0; p < response.data.length; p++) {
 

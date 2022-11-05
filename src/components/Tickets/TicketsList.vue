@@ -1073,6 +1073,7 @@ import Stopwatch from "@/components/Tickets/Stopwatch";
 import VueTimepicker from 'vue2-timepicker/src/vue-timepicker.vue'
 import moment from 'moment'
 
+
 export default {
   data() {
     return {  
@@ -1201,6 +1202,7 @@ export default {
     }
   },
   created() {   
+;
     this.filter_fy = this.$store.state.activeFY.label 
     setTimeout(() => {
       this.show =true
@@ -1291,6 +1293,9 @@ export default {
   },
 
   methods: {
+    handler() {
+      window.alert("Sure ka na?")
+    },
     ShowMore(default_limit, filters_length) {
       if(this.limit_by === filters_length){
         this.limit_by = default_limit
@@ -1693,6 +1698,11 @@ export default {
             }
             ////
           if(this.isCompleted == true){
+            console.log("test",localStorage.getItem(this.ticketID))
+            if(localStorage.getItem(this.ticketID)){
+              localStorage.removeItem(this.ticketID)
+              console.log(this.ticketID)
+            }
             let date_completion = this.formatDateCompleted +"T"+ this.date_completed_time
             ticket_param.period_ID =  SparrowService.pickPeriod(this.$store.state.periods[0], date_completion)
             setTimeout(() => {

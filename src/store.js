@@ -111,7 +111,9 @@ export default new Vuex.Store({
 
       dynamicExportReport:{},
 
-      opsManagerTeams:[]
+      opsManagerTeams:[],
+
+      isOnline:""
 
    },
    getters: {
@@ -661,7 +663,7 @@ export default new Vuex.Store({
                      state.activeTickectsCount += 1
                      state.runningTickets.push({
                         "id": response.data[i].id,
-                        "time": response.data[i].running_time + ":00",
+                        "time": response.data[i].running_time.substr(0,5),
                         "isStarted": true,
                         "isStopped": false,
                         "counter": 0,
@@ -1064,7 +1066,7 @@ export default new Vuex.Store({
       SET_TEAMS(state, teams) {
          state.teams.push(teams)
          for(var i = 0; i < teams.length; i++){
-            if(teams[i].manager_User_ID == 259){
+            if(teams[i].manager_User_ID == 259 ){
                state.opsManagerTeams.push(teams[i])
              }
          }
@@ -1259,7 +1261,6 @@ export default new Vuex.Store({
             })
          } else if (state.userInfo[0][0].length != 0 && state.userInfo[0][0].status == true && state.userInfo[0][0].roleID == 3) {
             state.isSupervisor = true
-            console.log(state.isSupervisor)
             var project = []
             var project_promise = []
 

@@ -1,9 +1,11 @@
 <template>
   <v-app>
-    <Navigation />
+    <Navigation /> 
+    
     <v-main :style="{ background: $vuetify.theme.themes[theme].background }">
       <v-container fluid>
         <MenuNotification />
+        {{test}}
         <router-view />
       </v-container>
     </v-main>
@@ -16,6 +18,11 @@ import MenuNotification from "@/components/Navigation/MenuNotification.vue";
 
 export default {
   name: "ProjectSparrow",
+  data(){
+    return{
+      test:""
+    }
+  },
   components: {
     Navigation,
     MenuNotification
@@ -40,6 +47,12 @@ export default {
     theme() {
       return this.$vuetify.theme.dark ? "dark" : "light";
     },
+   
   },
+  created(){
+  },
+  methods:{
+
+  }
 };
 </script>
