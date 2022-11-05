@@ -1698,10 +1698,8 @@ export default {
             }
             ////
           if(this.isCompleted == true){
-            console.log("test",localStorage.getItem(this.ticketID))
             if(localStorage.getItem(this.ticketID)){
               localStorage.removeItem(this.ticketID)
-              console.log(this.ticketID)
             }
             let date_completion = this.formatDateCompleted +"T"+ this.date_completed_time
             ticket_param.period_ID =  SparrowService.pickPeriod(this.$store.state.periods[0], date_completion)
@@ -1757,6 +1755,9 @@ export default {
     deleteTicket(){
       var tickets = []
       SparrowService.deleteTicket(this.ticketToDelete[0]).then(()=>{
+        if(localStorage.getItem(this.ticketToDelete[0])){
+            localStorage.removeItem(this.ticketToDelete[0])
+        }
         this.delete_dialog = false
         this.dialog_saving = true
         this.dialog_saving_text = "Deleting your ticket"

@@ -21,14 +21,24 @@ data() {
 },
 created(){
     this.running_ticket_index = this.$store.state.runningTickets.findIndex(t => t.id === this.ticket.id)
+   // console.log(this.running_ticket_index)
     window.onbeforeunload = function() {
       return "Data will be lost if you leave the page, are you sure?";
     };
 },
 mounted(){
-  let runningTime = localStorage.getItem(this.$store.state.runningTickets[this.running_ticket_index].id)
-  this.updateTicketTime(runningTime)
-  this.$store.state.runningTickets[this.running_ticket_index].time = moment().hour(runningTime.split(":")[0]).minute(runningTime.split(":")[1]).second("00").format('HH:mm:ss')
+  if(localStorage.getItem(this.$store.state.runningTickets[this.running_ticket_index].id)){
+    let runningTime = localStorage.getItem(this.$store.state.runningTickets[this.running_ticket_index].id)
+    this.updateTicketTime(runningTime)
+    this.$store.state.runningTickets[this.running_ticket_index].time = moment().hour(runningTime.split(":")[0]).minute(runningTime.split(":")[1]).second("00").format('HH:mm:ss')
+  }else{
+    localStorage.setItem(this.$store.state.runningTickets[this.running_ticket_index].id,moment().hour(this.$store.state.runningTickets[this.running_ticket_index].hour).minute(this.$store.state.runningTickets[this.running_ticket_index].minute).second(this.$store.state.runningTickets[this.running_ticket_index].counter++).format('HH:mm:ss'))
+    let runningTime = localStorage.getItem(this.$store.state.runningTickets[this.running_ticket_index].id)
+    this.updateTicketTime(runningTime)
+    this.$store.state.runningTickets[this.running_ticket_index].time = moment().hour(runningTime.split(":")[0]).minute(runningTime.split(":")[1]).second("00").format('HH:mm:ss')
+  }
+
+  
 }
 ,
 watch:{
@@ -48,7 +58,7 @@ methods:{
       this.$store.state.runningTickets[this.running_ticket_index].isStarted = false
       this.$store.state.runningTickets[this.running_ticket_index].isStopped = true
       this.$store.state.runningTickets[this.running_ticket_index].runClock = setInterval(this.displayTime, 1000);
-      this.$store.state.runningTickets[this.running_ticket_index].save_Ticket = setInterval(this.saveRunningTime, 30000) //900000
+      this.$store.state.runningTickets[this.running_ticket_index].save_Ticket = setInterval(this.saveRunningTime, 300000) //900000
   },
   stopWatch() {
         this.$store.state.runningTickets[this.running_ticket_index].isStarted = true;
