@@ -603,7 +603,7 @@ export default {
     getTickets(){
         this.loading=true
         this.Tickets = []
-        SparrowService.getTicketsByUser(this.team_member_id,this.filter_fy? 'FY23':this.filter_fy).then(response=>{
+        SparrowService.getTicketsByUser(this.team_member_id,this.filter_fy).then(response=>{
           if(this.filter_period.length == 0){
             this.loading = false
             this.Tickets = response.data
