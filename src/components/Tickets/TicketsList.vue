@@ -1706,8 +1706,6 @@ export default {
             setTimeout(() => {
                 if(this.ticket_Info.classification_ID == 2){
                 //Project              
-                  let start_date = this.formatStartDate +" "+ this.start_date_time
-                  let due_date = this.formatActualDueDate +" "+ this.actual_due_date_time
                   let SLA = 0
 
                   if(this.ticket_Info.adjusted_Service_Level_Agreement != null && this.ticket_Info.adjusted_Service_Level_Agreement > ticket_param.service_Level_Agreement)
@@ -1724,8 +1722,6 @@ export default {
                   this.updateRequest(ticket_param)
               }else if(this.ticket_Info.classification_ID == 1){
                 // Transactional            
-                  // let start_date = this.formatStartDate +" "+ this.start_date_time
-                  // let due_date = this.formatActualDueDate +" "+ this.actual_due_date_time
                   let SLA = 0
                   if(this.ticket_Info.adjusted_Service_Level_Agreement != null)
                     {SLA = this.ticket_Info.adjusted_Service_Level_Agreement 
@@ -1754,11 +1750,12 @@ export default {
     },
     deleteTicket(){
       var tickets = []
+      this.delete_dialog = false
       SparrowService.deleteTicket(this.ticketToDelete[0]).then(()=>{
         if(localStorage.getItem(this.ticketToDelete[0])){
             localStorage.removeItem(this.ticketToDelete[0])
         }
-        this.delete_dialog = false
+        
         this.dialog_saving = true
         this.dialog_saving_text = "Deleting your ticket"
         setTimeout(() => {

@@ -4,14 +4,18 @@ export default {
   TimeSpentCalculation(date_started,date_completed){
     let formatStartDate= moment(date_started).format("YYYY-MM-DD HH:mm:ss")
     let formatCompletedDate = moment(date_completed).format("YYYY-MM-DD HH:mm:ss")
+
     let timespent = 0
     let working_hours = 0
     let working_days = 0
     let duration_timespent_difference = 0
+
     let shift_start_time_when_ticket_is_completed = 0
     let shift_end_time_when_ticket_is_completed = 0
+
     let shift_start_time_when_ticket_is_started = 0
     let shift_end_time_when_ticket_is_started = 0
+
     let start_time = 0
 
     // If the User Changed Shift when the ticket is started
@@ -30,8 +34,8 @@ export default {
       shift_start_time_when_ticket_is_completed = Store.state.user_shift.start_Time
       shift_end_time_when_ticket_is_completed =  Store.state.user_shift.end_Time
     }else{
-    shift_start_time_when_ticket_is_completed = parseInt(Store.state.user_CS[0][cs_end_shift].cS_Start_Time.substr(11, 13))
-    shift_end_time_when_ticket_is_completed = parseInt(Store.state.user_CS[0][cs_end_shift].cS_End_Time.substr(11, 13))
+      shift_start_time_when_ticket_is_completed = parseInt(Store.state.user_CS[0][cs_end_shift].cS_Start_Time.substr(11, 13))
+      shift_end_time_when_ticket_is_completed = parseInt(Store.state.user_CS[0][cs_end_shift].cS_End_Time.substr(11, 13))
     }
 
     // If ticket is received on weekend (Add 2 days)
@@ -65,6 +69,7 @@ export default {
     working_days = duration_timespent_difference.asDays()
     // Initial Time (Hours) Difference Between Start and End date of Ticket
     working_hours = duration_timespent_difference.asHours()
+   
     if(parseInt(moment(formatStartDate).format('HH')) == 0 )
       {
         start_time = 24
@@ -75,21 +80,24 @@ export default {
     // If ticket is opened/closed the same shift 
     if(working_hours <= 9)
     {  
-        // If ticket is received prior to start of shift (adjust the Start time to the start of shift schedule)
-        if(start_time <= shift_start_time_when_ticket_is_started && start_time >= shift_end_time_when_ticket_is_started)
-        { 
-          let hours_to_adjust = shift_start_time_when_ticket_is_started - parseInt(moment(formatStartDate).format('HH'))
-          working_hours = working_hours - hours_to_adjust
-        }       
+        // If ticket is received prior to the start of shift (adjust the Start time to the start of shift schedule)
+        //if(start_time <= shift_start_time_when_ticket_is_started && start_time >= shift_end_time_when_ticket_is_started)
+        // { 
+        //   let hours_to_adjust = shift_start_time_when_ticket_is_started - parseInt(moment(formatStartDate).format('HH'))
+        //   working_hours = working_hours - hours_to_adjust
+        //   console.log("start_time",start_time)
+        //   console.log("hours_to_adjust",hours_to_adjust)
+        //   console.log("working_hours",working_hours)
+        // }       
     }
     // If ticket is consumed more than 1 shift
     else if(working_hours > 9){
         // If ticket is received prior to start of shift (adjust the Start time to the start of shift schedule)
-        if(start_time <= shift_start_time_when_ticket_is_started && start_time >= shift_end_time_when_ticket_is_started)
-        { 
-          let hours_to_adjust = shift_start_time_when_ticket_is_started - parseInt(moment(formatStartDate).format('HH'))
-          working_hours = working_hours - hours_to_adjust
-        } 
+        // if(start_time <= shift_start_time_when_ticket_is_started && start_time >= shift_end_time_when_ticket_is_started)
+        // { 
+        //   let hours_to_adjust = shift_start_time_when_ticket_is_started - parseInt(moment(formatStartDate).format('HH'))
+        //   working_hours = working_hours - hours_to_adjust
+        // } 
 
         // Take off Non_Working Hours (-15 in every 24 hours to get 9hrs shift only)
         working_hours = working_hours - ((working_hours/24)*15)
@@ -112,9 +120,11 @@ export default {
             }
           }
     }
+    //console.log("working_hours",working_hours)
     return parseFloat(working_hours.toFixed(1));
   },
   serviceRatingComputation(time_spent,sla){
+    console.log()
     var timespent_over_sla = (time_spent/sla).toFixed(2)
     var service_rating = null
       if(timespent_over_sla < 0.25)
