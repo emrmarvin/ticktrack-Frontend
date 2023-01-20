@@ -1,3 +1,4 @@
+import HackTimer from "./plugins/hacktimer/HackTimer";
 import Vue from 'vue'
 import App from './App.vue'
 import upperFirst from 'lodash/upperFirst'
