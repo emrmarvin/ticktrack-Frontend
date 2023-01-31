@@ -64,7 +64,48 @@ const routes = [
   {
     path: '/tl-dashboard',
     name: 'HomeTL',
-    component: () => import('../views/HomeTL.vue')
+    component: () => import('../views/HomeTL.vue'),
+    beforeEnter: (to, from, next) => {
+      var authService = new AuthService();
+      var graphService = new GraphService();
+      authService.getToken().then(
+        (token) => {
+          if (token) {
+            graphService.getUserInfo(token).then(
+              (data) => {
+                SparrowService.getUserInfo(data.mail)
+                .then(response =>{
+                   if(response.data.length == 0){
+                    next('/register')
+                   }else if(response.data.length != 0) {
+                      if(response.data[0].status == false){
+                        next('/pending-approval')
+                      }
+                      else{
+                        if(response.data[0].roleID == 3){
+                          next('/sup-dashboard')
+                        }else if(response.data[0].roleID == 8){
+                          next('/manager-dashboard')
+                        }
+                        else{
+                          next()
+                        }
+                      }
+                   } 
+                })
+                .catch(error => {
+                  console.log(error.response)
+               })
+              },
+              (error) => {
+                console.error(error);
+              }
+            )
+            
+          }
+          else next({name:'Log-In'})
+        })
+    }
   },
   {
     path: '/sup-dashboard',
@@ -74,17 +115,140 @@ const routes = [
   {
     path: '/manager-dashboard',
     name: 'DashboardManager',
-    component: () => import('../components/Dashboards/DashboardManager.vue')
+    component: () => import('../components/Dashboards/DashboardManager.vue'),
+    beforeEnter: (to, from, next) => {
+      var authService = new AuthService();
+      var graphService = new GraphService();
+      authService.getToken().then(
+        (token) => {
+          if (token) {
+            graphService.getUserInfo(token).then(
+              (data) => {
+                SparrowService.getUserInfo(data.mail)
+                .then(response =>{
+                   if(response.data.length == 0){
+                    next('/register')
+                   }else if(response.data.length != 0) {
+                      if(response.data[0].status == false){
+                        next('/pending-approval')
+                      }
+                      else{
+                        if(response.data[0].roleID == 3){
+                          next('/sup-dashboard')
+                        }else if(response.data[0].roleID == 8){
+                          next('/manager-dashboard')
+                        }
+                        else{
+                          next()
+                        }
+                      }
+                   } 
+                })
+                .catch(error => {
+                  console.log(error.response)
+               })
+              },
+              (error) => {
+                console.error(error);
+              }
+            )
+            
+          }
+          else next({name:'Log-In'})
+        })
+    }
   },
   {
     path: '/group-management',
     name: 'Groups-Settings',
-    component: () => import('../views/GroupsSettings.vue')
+    component: () => import('../views/GroupsSettings.vue'),
+    beforeEnter: (to, from, next) => {
+      var authService = new AuthService();
+      var graphService = new GraphService();
+      authService.getToken().then(
+        (token) => {
+          if (token) {
+            graphService.getUserInfo(token).then(
+              (data) => {
+                SparrowService.getUserInfo(data.mail)
+                .then(response =>{
+                   if(response.data.length == 0){
+                    next('/register')
+                   }else if(response.data.length != 0) {
+                      if(response.data[0].status == false){
+                        next('/pending-approval')
+                      }
+                      else{
+                        if(response.data[0].roleID == 3){
+                          next('/sup-dashboard')
+                        }else if(response.data[0].roleID == 8){
+                          next('/manager-dashboard')
+                        }
+                        else{
+                          next()
+                        }
+                      }
+                   } 
+                })
+                .catch(error => {
+                  console.log(error.response)
+               })
+              },
+              (error) => {
+                console.error(error);
+              }
+            )
+            
+          }
+          else next({name:'Log-In'})
+        })
+    }
   },
   {
     path: '/user-management',
     name: 'UserManagement',
-    component: () => import('../views/UserSettings.vue')
+    component: () => import('../views/UserSettings.vue'),
+    beforeEnter: (to, from, next) => {
+      var authService = new AuthService();
+      var graphService = new GraphService();
+      authService.getToken().then(
+        (token) => {
+          if (token) {
+            graphService.getUserInfo(token).then(
+              (data) => {
+                SparrowService.getUserInfo(data.mail)
+                .then(response =>{
+                   if(response.data.length == 0){
+                    next('/register')
+                   }else if(response.data.length != 0) {
+                      if(response.data[0].status == false){
+                        next('/pending-approval')
+                      }
+                      else{
+                        if(response.data[0].roleID == 3){
+                          next('/sup-dashboard')
+                        }else if(response.data[0].roleID == 8){
+                          next('/manager-dashboard')
+                        }
+                        else{
+                          next()
+                        }
+                      }
+                   } 
+                })
+                .catch(error => {
+                  console.log(error.response)
+               })
+              },
+              (error) => {
+                console.error(error);
+              }
+            )
+            
+          }
+          else next({name:'Log-In'})
+        })
+    }
   },
   {
     path: '/roles',
@@ -105,17 +269,140 @@ const routes = [
   {
     path: '/ticket-requests',
     name: 'Tickets',
-    component: () => import('../views/Tickets.vue')
+    component: () => import('../views/Tickets.vue'),
+    beforeEnter: (to, from, next) => {
+      var authService = new AuthService();
+      var graphService = new GraphService();
+      authService.getToken().then(
+        (token) => {
+          if (token) {
+            graphService.getUserInfo(token).then(
+              (data) => {
+                SparrowService.getUserInfo(data.mail)
+                .then(response =>{
+                   if(response.data.length == 0){
+                    next('/register')
+                   }else if(response.data.length != 0) {
+                      if(response.data[0].status == false){
+                        next('/pending-approval')
+                      }
+                      else{
+                        if(response.data[0].roleID == 3){
+                          next('/sup-dashboard')
+                        }else if(response.data[0].roleID == 8){
+                          next('/manager-dashboard')
+                        }
+                        else{
+                          next()
+                        }
+                      }
+                   } 
+                })
+                .catch(error => {
+                  console.log(error.response)
+               })
+              },
+              (error) => {
+                console.error(error);
+              }
+            )
+            
+          }
+          else next({name:'Log-In'})
+        })
+    }
   },
   {
     path: '/tickets-table',
     name: 'TicketsTable',
-    component: () => import('../components/Tickets/TicketsTable.vue')
+    component: () => import('../components/Tickets/TicketsTable.vue'),
+    beforeEnter: (to, from, next) => {
+      var authService = new AuthService();
+      var graphService = new GraphService();
+      authService.getToken().then(
+        (token) => {
+          if (token) {
+            graphService.getUserInfo(token).then(
+              (data) => {
+                SparrowService.getUserInfo(data.mail)
+                .then(response =>{
+                   if(response.data.length == 0){
+                    next('/register')
+                   }else if(response.data.length != 0) {
+                      if(response.data[0].status == false){
+                        next('/pending-approval')
+                      }
+                      else{
+                        if(response.data[0].roleID == 3){
+                          next('/sup-dashboard')
+                        }else if(response.data[0].roleID == 8){
+                          next('/manager-dashboard')
+                        }
+                        else{
+                          next()
+                        }
+                      }
+                   } 
+                })
+                .catch(error => {
+                  console.log(error.response)
+               })
+              },
+              (error) => {
+                console.error(error);
+              }
+            )
+            
+          }
+          else next({name:'Log-In'})
+        })
+    }
   },
   {
     path: '/import',
     name: 'ImportTicket',
-    component: () => import('../components/Import/ImportTicket.vue')
+    component: () => import('../components/Import/ImportTicket.vue'),
+    beforeEnter: (to, from, next) => {
+      var authService = new AuthService();
+      var graphService = new GraphService();
+      authService.getToken().then(
+        (token) => {
+          if (token) {
+            graphService.getUserInfo(token).then(
+              (data) => {
+                SparrowService.getUserInfo(data.mail)
+                .then(response =>{
+                   if(response.data.length == 0){
+                    next('/register')
+                   }else if(response.data.length != 0) {
+                      if(response.data[0].status == false){
+                        next('/pending-approval')
+                      }
+                      else{
+                        if(response.data[0].roleID == 3){
+                          next('/sup-dashboard')
+                        }else if(response.data[0].roleID == 8){
+                          next('/manager-dashboard')
+                        }
+                        else{
+                          next()
+                        }
+                      }
+                   } 
+                })
+                .catch(error => {
+                  console.log(error.response)
+               })
+              },
+              (error) => {
+                console.error(error);
+              }
+            )
+            
+          }
+          else next({name:'Log-In'})
+        })
+    }
   },
   {
     path: '/register',
