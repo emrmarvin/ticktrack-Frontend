@@ -25,6 +25,7 @@ Vue.component('downloadExcel', JsonExcel)
 Vue.use(VueExcelXlsx);
 Vue.use(require('vue-chartist'))
 Vue.use(VueTour)
+Vue.use(HackTimer)
 
 Vue.use(DaySpanVuetify, {
   methods: {
