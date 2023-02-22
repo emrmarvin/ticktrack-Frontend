@@ -1318,17 +1318,20 @@ export default {
       }
     },
     selectcard(e,ticket,status){
+      if(e.target.classList.contains('v-icon')){
+        return;
+      }
       if(Object.keys(this.selectedtickets).indexOf(`${ticket}`) != -1){
-        e.currentTarget.style.background =   "#ffffff";
+        e.currentTarget.style.background = "#ffffff";
         delete this.selectedtickets[`${ticket}`];
       }else{
         this.selectedtickets[ticket] = status;
         e.currentTarget.style.background = "#1F7087"
       }
+
       if(Object.keys(this.selectedtickets).length > 0){
         document.getElementById('deleteall').style.display = "inline"
       }else{
-        console.log('none')
         document.getElementById('deleteall').style.display = "none"
       }
     },
@@ -1788,7 +1791,6 @@ export default {
       var tickets = []
       this.delete_dialog = false
       SparrowService.deleteTicket(this.ticketToDelete[0]).then(async(response)=>{
-        console.log(response)
         if(localStorage.getItem(this.ticketToDelete[0])){
             localStorage.removeItem(this.ticketToDelete[0])
         }
@@ -1797,11 +1799,9 @@ export default {
         this.dialog_saving_text = "Deleting your ticket"
         setTimeout(() => {
             SparrowService.getTicketsByUser(this.$store.state.userID,this.$store.state.activeFY.label)
-                    .then(response => {    
-                      // console.log(response)     
+                    .then(response => {        
                       if(this.ticketToDelete[1] == this.$store.state.inProgressStatus.toLowerCase())
                         {     
-                          console.log('1');
                           for(let i = 0 ; i < response.data.length; i++){
                             if(response.data[i].ticket_Status.status.toLowerCase() == this.$store.state.inProgressStatus.toLowerCase())
                               {  
@@ -1818,7 +1818,6 @@ export default {
                             this.disabledExportButton = true
                         }else if(this.ticketToDelete[1] == this.$store.state.completedStatus.toLowerCase())
                         {
-                          console.log('2');
                           for(let i = 0 ; i < response.data.length; i++){
                             if(response.data[i].ticket_Status.status.toLowerCase()  == this.$store.state.completedStatus.toLowerCase())
                               {  
@@ -1831,12 +1830,7 @@ export default {
                             this.$store.dispatch("filterCompletedTickets",this.filter_period)
                             this.dialog_saving = false
                             this.disabledExportButton = true
-                        }else{
-                          console.log('3');
-                          console.log(this.ticketToDelete[1]);
-                          console.log(this.$store.state.completedStatus.toLowerCase());
-                          console.log(this.$store.state.inProgressStatus.toLowerCase())
-                        }   
+                        } 
                       })
                       
         }, 1500);
@@ -2217,7 +2211,6 @@ export default {
                   ticket_Owner_ID: response.data.ticket_Owner_ID,
                   ticket_Status_ID: response.data.ticket_Status_ID
                 }
-                console.log("test",ticket_param.adjusted_Service_Level_Agreement)
                SparrowService.putTicket(ticket_param.id,ticket_param)
             })
           )
