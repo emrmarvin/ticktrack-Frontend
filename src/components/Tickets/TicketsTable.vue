@@ -28,13 +28,40 @@
                 </template>
               </v-select>
     </v-container>
-
-
+           <v-btn
+              class="primary mb-5"
+              height="50px"
+              @click="isShowSelect = true"
+              v-if="isShowSelect == false"
+              >
+            <v-icon color="white" class="mr-3"> mdi-select-multiple </v-icon> Select Multiple
+          </v-btn>
+          <v-btn
+              class="primary mb-5"
+              height="50px"
+              @click="isShowSelect = false, selected = []"
+              v-if="isShowSelect == true"
+              >
+            <v-icon color="white" class="mr-3"> mdi-eye-off </v-icon> Hide Multiple Select
+          </v-btn>
+          <v-btn
+            class="primary ml-5 mb-5"
+            height="50px"
+            color="error"
+            @click="bulk_delete('Table',selected)"
+            id="deleteall"
+            v-if="selected.length != 0"
+            >
+          <v-icon color="white" class="mr-3"> mdi-delete </v-icon> Delete Selected {{selected.length}} item(s)
+        </v-btn>
         <v-data-table
+          v-model="selected"
           :headers="headers"
           :items="Tickets"
           sort-by="calories"
           class="elevation-1"
+          :show-select="isShowSelect"
+          item-key="id"
         >
          <template v-slot:[`item.start_Date`]="{ item }">
             {{formatDisplayDate(item.start_Date)}}
@@ -87,10 +114,13 @@ export default {
     Tickets:{type: Array},
     filterValue:{type:String},
     filter_period:{type:Array},
+    bulk_delete:{type:Function},
     show_delete:{type:Boolean}
   },
   data() {
     return{
+    selected:[],
+    isShowSelect:false,
     headers:[
       { text: "Period", value: "period.abbreviation" },
       { text: "Title", value: "title" },

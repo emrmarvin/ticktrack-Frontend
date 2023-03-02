@@ -42,7 +42,7 @@
         class="primary ml-5"
         height="50px"
         color="error"
-        @click="bulkdelete()"
+        @click="bulkdelete('Card')"
         id="deleteall"
         style="display:none"
          >
@@ -249,12 +249,13 @@
           :filter_period="filter_period"
           :update_ticket="getTicketToUpdate"
           :delete_ticket="getTicketToDelete"
+          :bulk_delete="bulkdelete"
           :show_delete="true"
          />
       </v-col>
     </v-row>
 
-       <!--////////////////////////Non-Functional//////////////////////-->
+    <!--////////////////////////Non-Functional//////////////////////-->
     <v-divider class="mt-10"></v-divider>
     <v-row class="mx-auto mt-12 mb-6">
       <v-col cols="4">
@@ -317,7 +318,7 @@
               </v-list-item-group>
             </v-list>
           </v-menu>
-        <!---->   
+      <!---->   
       </v-col>
     </v-row>
       <v-row v-if="isCardView">
@@ -1196,7 +1197,8 @@ export default {
       ticketLength:0,
       disable_add_button:false,
 
-      number_of_leave:0
+      number_of_leave:0,
+      count_ticketToDeleted:0
     };
   },
   components:{
@@ -1309,15 +1311,25 @@ export default {
     handler() {
       window.alert("Sure ka na?")
     },
-    bulkdelete(){
-      let tickets = Object.keys(this.selectedtickets);
-      for(let i=0;i<tickets.length;i++){
-        this.ticketToDelete[0] = tickets[i];
-        this.ticketToDelete[1] = this.selectedtickets[tickets[i]].toLowerCase();
-        this.deleteTicket();
+    bulkdelete(view,selected){
+      if(view == "Card"){
+        let tickets = Object.keys(this.selectedtickets);
+        for(let i=0;i<tickets.length;i++){
+          this.ticketToDelete[0] = tickets[i];
+          this.ticketToDelete[1] = this.selectedtickets[tickets[i]].toLowerCase();
+          this.deleteTicket();
+        }
+      }else if(view == "Table"){
+          for(let i=0;i<selected.length;i++){
+            this.ticketToDelete[0] = selected[i].id;
+            this.ticketToDelete[1] = selected[i].ticket_Status.status.toLowerCase();
+            this.deleteTicket();
+          }
       }
+      
     },
     selectcard(e,ticket,status){
+      
       if(e.target.classList.contains('v-icon')){
         return;
       }
@@ -1334,6 +1346,8 @@ export default {
       }else{
         document.getElementById('deleteall').style.display = "none"
       }
+      
+      this.count_ticketToDeleted = Object.keys(this.selectedtickets).length
     },
     ShowMore(default_limit, filters_length) {
       if(this.limit_by === filters_length){
@@ -1593,7 +1607,6 @@ export default {
         )
         Promise.all(ticket_promise).then(()=>{
           this.isLoaded = true
-          console.log(this.ticket_Info)
         })     
     },
     updateRequest(ticket_param){
@@ -1688,58 +1701,74 @@ export default {
               let number_of_days_to_work = 0
               let initial_sla = null
               let sla = 0
-              if(this.ticket_Info.adjusted_Service_Level_Agreement != null && this.ticket_Info.adjusted_Service_Level_Agreement > ticket_param.service_Level_Agreement)
-                {
-                  sla = this.ticket_Info.adjusted_Service_Level_Agreement 
-                }else{
-                  sla = ticket_param.service_Level_Agreement
-                }
-                
-              for(let i =0 ; i <this.$store.state.complexitiesByTeam[0].length; i++){ 
-                  if(this.$store.state.complexitiesByTeam[0][i].id == this.ticket_Info.complexity_ID){
-                      sla = this.$store.state.complexitiesByTeam[0][i].no_of_hrs
-                      if(this.$store.state.complexitiesByTeam[0][i].no_of_hrs >= 9){
-                        number_of_days_to_work = sla/9
-                        let hours_to_add =  sla%9
-                        initial_sla = moment(ticket_param.start_Date).add(number_of_days_to_work, 'days').format('YYYY-MM-DDTHH:mm:ss');
-
-                        if(hours_to_add != 0){
-                          initial_sla = moment(initial_sla).add(hours_to_add, 'hours').format('YYYY-MM-DDTHH:mm:ss');
-                        }
-
-                      }else if(this.$store.state.complexitiesByTeam[0][i].no_of_hrs < 9){
-                        var time = this.start_date_time
-                        var hoursMinutes = time.split(/[.:]/);
-                        var hours = parseInt(hoursMinutes[0], 10);
-                        var minutes = hoursMinutes[1] ? parseInt(hoursMinutes[1], 10) : 0;
-                        var converted_time = hours + minutes / 60;         
-                        let time_remaining_in_shift = this.$store.state.user_shift.end_Time - converted_time.toFixed(2)
-                        if (time_remaining_in_shift < sla){
-                          initial_sla = moment(ticket_param.start_Date).add(15 + sla, 'hours').format('YYYY-MM-DDTHH:mm:ss');
-                        }else{
-                          initial_sla = moment(ticket_param.start_Date).add(sla, 'hours').format('YYYY-MM-DDTHH:mm:ss');
-                        }
-
-                      }
-
-                      //Adjusting due dates for weekends
-                      for(let i = 0 ; i < number_of_days_to_work ;i++){
-                         if(moment(this.formatStartDate).add(i+1, 'days').format('dddd') == "Saturday" || moment(this.formatStartDate).add(i+1, 'days').format('dddd') == "Sunday" )
-                            {
-                              initial_sla = moment(initial_sla).add(2, 'days').format('YYYY-MM-DDTHH:mm:ss');
-                              break;
-                            } 
-                      }
-
-                      if(this.ticket_Info.adjusted_Service_Level_Agreement != null && this.ticket_Info.adjusted_Service_Level_Agreement > ticket_param.service_Level_Agreement){
-                        let time_adjustment = this.ticket_Info.adjusted_Service_Level_Agreement - ticket_param.service_Level_Agreement
-                        ticket_param.actual_due_date = moment(initial_sla).add(time_adjustment,'hours')
-                      }else{
-                        ticket_param.actual_due_date = initial_sla        
-                      }
-                              
+              let adjusted_sla = 0
+                  if(this.ticket_Info.adjusted_Service_Level_Agreement != null && this.ticket_Info.adjusted_Service_Level_Agreement > ticket_param.service_Level_Agreement){
+                      adjusted_sla = this.ticket_Info.adjusted_Service_Level_Agreement - ticket_param.service_Level_Agreement
                   }
-              }
+                   for(let i =0 ; i <this.$store.state.complexitiesByTeam[0].length; i++){ 
+                    if(this.$store.state.complexitiesByTeam[0][i].id == this.ticket_Info.complexity_ID){
+                        sla = this.$store.state.complexitiesByTeam[0][i].no_of_hrs
+                        if(sla >= 9){
+                          number_of_days_to_work = sla/9
+                          let hours_to_add =  sla%9
+                          initial_sla = moment(ticket_param.start_Date).add(number_of_days_to_work, 'days').format('YYYY-MM-DDTHH:mm:ss');
+
+                          if(hours_to_add != 0){
+                            initial_sla = moment(initial_sla).add(hours_to_add, 'hours').format('YYYY-MM-DDTHH:mm:ss');
+                          }
+
+                        }else if(sla < 9){
+                          var time = this.start_date_time
+                          var hoursMinutes = time.split(/[.:]/);
+                          var hours = parseInt(hoursMinutes[0], 10);
+                          var minutes = hoursMinutes[1] ? parseInt(hoursMinutes[1], 10) : 0;
+                          var converted_time = hours + minutes / 60;         
+                          let time_remaining_in_shift = this.$store.state.user_shift.end_Time - converted_time.toFixed(2)
+                          if (time_remaining_in_shift < sla){
+                            initial_sla = moment(ticket_param.start_Date).add(15 + sla, 'hours').format('YYYY-MM-DDTHH:mm:ss');
+                          }else{
+                            initial_sla = moment(ticket_param.start_Date).add(sla, 'hours').format('YYYY-MM-DDTHH:mm:ss');
+                          }
+
+                        }
+
+                        //Adjusting due dates for weekends
+                        for(let i = 0 ; i < number_of_days_to_work ;i++){
+                          if(moment(this.formatStartDate).add(i+1, 'days').format('dddd') == "Saturday" || moment(this.formatStartDate).add(i+1, 'days').format('dddd') == "Sunday" )
+                              {
+                                initial_sla = moment(initial_sla).add(2, 'days').format('YYYY-MM-DDTHH:mm:ss');
+                                break;
+                              } 
+                        }
+
+                        if(adjusted_sla != 0){
+                          let end_shift = 0
+                            let initial_due_date = moment(initial_sla).add(adjusted_sla, 'hours').format('YYYY-MM-DDTHH:mm:ss');
+
+                            if(this.$store.state.user_shift.end_Time = 24){end_shift = 0}else{end_shift = this.$store.state.user_shift.end_Time}
+
+                            if(moment(initial_due_date).format('dddd') == "Saturday" || moment(initial_due_date).format('dddd') == "Sunday")
+                                {
+                                  initial_due_date = moment(initial_due_date).add(2, 'days').format('YYYY-MM-DDTHH:mm:ss');
+                                } 
+                                else if(moment(initial_due_date).format('dddd') == "Sunday"){
+                                  initial_due_date = moment(initial_due_date).add(1, 'days').format('YYYY-MM-DDTHH:mm:ss');
+                              }
+
+                            if(parseInt(moment(initial_due_date).format('HH')) < this.$store.state.user_shift.start_Time && 
+                              parseInt(moment(initial_due_date).format('HH')) > end_shift )
+                              {
+                                  initial_due_date = moment(initial_due_date).add(15, 'hours').format('YYYY-MM-DDTHH:mm:ss');
+                              }
+
+                            ticket_param.actual_due_date = initial_due_date        
+                        }else{
+                          ticket_param.actual_due_date = initial_sla    
+                        }
+                        
+                                
+                    }
+                }    
             }
             ////
           if(this.isCompleted == true){
@@ -2165,24 +2194,13 @@ export default {
 
                         if(this.$store.state.user_shift.end_Time = 24){end_shift = 0}else{end_shift = this.$store.state.user_shift.end_Time}
 
-
-                        if(this.$store.state.world_area_support == "MEA"){
-                          if(moment(initial_due_date).format('dddd') == "Friday")
-                            {
-                              initial_due_date = moment(initial_due_date).add(2, 'days').format('YYYY-MM-DDTHH:mm:ss');
-                            }
-                            else if(moment(initial_due_date).format('dddd') == "Saturday"){
-                              initial_due_date = moment(initial_due_date).add(1, 'days').format('YYYY-MM-DDTHH:mm:ss');
-                            } 
-                        }else{
-                          if(moment(initial_due_date).format('dddd') == "Saturday" || moment(initial_due_date).format('dddd') == "Sunday")
+                        if(moment(initial_due_date).format('dddd') == "Saturday" || moment(initial_due_date).format('dddd') == "Sunday")
                             {
                               initial_due_date = moment(initial_due_date).add(2, 'days').format('YYYY-MM-DDTHH:mm:ss');
                             } 
                             else if(moment(initial_due_date).format('dddd') == "Sunday"){
                               initial_due_date = moment(initial_due_date).add(1, 'days').format('YYYY-MM-DDTHH:mm:ss');
-                            }
-                        }
+                          }
 
                         if(parseInt(moment(initial_due_date).format('HH')) < this.$store.state.user_shift.start_Time && 
                            parseInt(moment(initial_due_date).format('HH')) > end_shift )
