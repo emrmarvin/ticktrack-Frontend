@@ -38,6 +38,18 @@
          >
       <v-icon style="background-color:white;border-radius:50px;margin-right:5px" color="primary">mdi-plus</v-icon> Add New Non-Functional Activity
     </v-btn>
+    <v-btn
+        class="primary ml-5"
+        height="50px"
+        color="error"
+        @click="bulkdelete()"
+        id="deleteall"
+        style="display:none"
+         >
+      <!-- <v-icon style="background-color:white;border-radius:50px;margin-right:5px" color="primary">mdi-plus</v-icon> Add New Non-Functional Activity -->
+      <v-icon color="white"> mdi-delete </v-icon> Delete Selected
+    </v-btn>
+
     <!--FY Filter-->
      <v-select  
             :items="$store.state.fiscalYears[0]"
@@ -153,7 +165,7 @@
 
       <v-col cols="12" md="6" v-for="(ticket,index) in this.$store.state.userTickets[0]" :key="ticket.id"> 
         <div>
-        <v-card elevation="15" class="pa-4 ticket_card" v-if="index < limit_by" >
+        <v-card elevation="15" class="pa-4 ticket_card ticket_card-main"  v-if="index < limit_by" @click="$event => selectcard($event,ticket.id,ticket.ticket_Status.status)">
           <v-card-title class="title mb-3" v-bind:style="statusColor(ticket.ticket_Status.status)">
             {{ ticket.title}}
             <v-row align="center" justify="end" >
@@ -1077,6 +1089,7 @@ import moment from 'moment'
 export default {
   data() {
     return {  
+      selectedtickets: {},
       default_limit: 5,
       limit_by: 5,
       menu: false,
@@ -1295,6 +1308,32 @@ export default {
   methods: {
     handler() {
       window.alert("Sure ka na?")
+    },
+    bulkdelete(){
+      let tickets = Object.keys(this.selectedtickets);
+      for(let i=0;i<tickets.length;i++){
+        this.ticketToDelete[0] = tickets[i];
+        this.ticketToDelete[1] = this.selectedtickets[tickets[i]].toLowerCase();
+        this.deleteTicket();
+      }
+    },
+    selectcard(e,ticket,status){
+      if(e.target.classList.contains('v-icon')){
+        return;
+      }
+      if(Object.keys(this.selectedtickets).indexOf(`${ticket}`) != -1){
+        e.currentTarget.style.background = "#ffffff";
+        delete this.selectedtickets[`${ticket}`];
+      }else{
+        this.selectedtickets[ticket] = status;
+        e.currentTarget.style.background = "#1F7087"
+      }
+
+      if(Object.keys(this.selectedtickets).length > 0){
+        document.getElementById('deleteall').style.display = "inline"
+      }else{
+        document.getElementById('deleteall').style.display = "none"
+      }
     },
     ShowMore(default_limit, filters_length) {
       if(this.limit_by === filters_length){
@@ -1757,7 +1796,7 @@ export default {
     deleteTicket(){
       var tickets = []
       this.delete_dialog = false
-      SparrowService.deleteTicket(this.ticketToDelete[0]).then(()=>{
+      SparrowService.deleteTicket(this.ticketToDelete[0]).then(async(response)=>{
         if(localStorage.getItem(this.ticketToDelete[0])){
             localStorage.removeItem(this.ticketToDelete[0])
         }
@@ -1766,7 +1805,7 @@ export default {
         this.dialog_saving_text = "Deleting your ticket"
         setTimeout(() => {
             SparrowService.getTicketsByUser(this.$store.state.userID,this.$store.state.activeFY.label)
-                    .then(response => {          
+                    .then(response => {        
                       if(this.ticketToDelete[1] == this.$store.state.inProgressStatus.toLowerCase())
                         {     
                           for(let i = 0 ; i < response.data.length; i++){
@@ -1797,7 +1836,7 @@ export default {
                             this.$store.dispatch("filterCompletedTickets",this.filter_period)
                             this.dialog_saving = false
                             this.disabledExportButton = true
-                        }   
+                        } 
                       })
                       
         }, 1500);
@@ -2178,7 +2217,6 @@ export default {
                   ticket_Owner_ID: response.data.ticket_Owner_ID,
                   ticket_Status_ID: response.data.ticket_Status_ID
                 }
-                console.log("test",ticket_param.adjusted_Service_Level_Agreement)
                SparrowService.putTicket(ticket_param.id,ticket_param)
             })
           )
