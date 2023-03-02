@@ -1554,6 +1554,7 @@ export default {
         )
         Promise.all(ticket_promise).then(()=>{
           this.isLoaded = true
+          console.log(this.ticket_Info)
         })     
     },
     updateRequest(ticket_param){
@@ -1639,7 +1640,6 @@ export default {
             ticket_Status_ID: this.ticket_Info.ticket_Status_ID,
             fy_ID:this.ticket_Info.fY_ID
           }
-            /////
             //Project
             if(this.ticket_Info.classification_ID == 2){
               ticket_param.service_Level_Agreement = Computations.ProjectSLAComputation(this.formatStartDate +"T"+ this.start_date_time ,this.formatActualDueDate +"T"+ this.actual_due_date_time)
@@ -1648,12 +1648,20 @@ export default {
               //Loop to get the SLA of the ticket
               let number_of_days_to_work = 0
               let initial_sla = null
+              let sla = 0
+              if(this.ticket_Info.adjusted_Service_Level_Agreement != null && this.ticket_Info.adjusted_Service_Level_Agreement > ticket_param.service_Level_Agreement)
+                {
+                  sla = this.ticket_Info.adjusted_Service_Level_Agreement 
+                }else{
+                  sla = ticket_param.service_Level_Agreement
+                }
+                
               for(let i =0 ; i <this.$store.state.complexitiesByTeam[0].length; i++){ 
                   if(this.$store.state.complexitiesByTeam[0][i].id == this.ticket_Info.complexity_ID){
-                      ticket_param.service_Level_Agreement = this.$store.state.complexitiesByTeam[0][i].no_of_hrs
+                      sla = this.$store.state.complexitiesByTeam[0][i].no_of_hrs
                       if(this.$store.state.complexitiesByTeam[0][i].no_of_hrs >= 9){
-                        number_of_days_to_work = ticket_param.service_Level_Agreement/9
-                        let hours_to_add =  ticket_param.service_Level_Agreement%9
+                        number_of_days_to_work = sla/9
+                        let hours_to_add =  sla%9
                         initial_sla = moment(ticket_param.start_Date).add(number_of_days_to_work, 'days').format('YYYY-MM-DDTHH:mm:ss');
 
                         if(hours_to_add != 0){
@@ -1667,32 +1675,30 @@ export default {
                         var minutes = hoursMinutes[1] ? parseInt(hoursMinutes[1], 10) : 0;
                         var converted_time = hours + minutes / 60;         
                         let time_remaining_in_shift = this.$store.state.user_shift.end_Time - converted_time.toFixed(2)
-                        if (time_remaining_in_shift < ticket_param.service_Level_Agreement){
-                          initial_sla = moment(ticket_param.start_Date).add(15 + ticket_param.service_Level_Agreement, 'hours').format('YYYY-MM-DDTHH:mm:ss');
+                        if (time_remaining_in_shift < sla){
+                          initial_sla = moment(ticket_param.start_Date).add(15 + sla, 'hours').format('YYYY-MM-DDTHH:mm:ss');
                         }else{
-                          initial_sla = moment(ticket_param.start_Date).add(ticket_param.service_Level_Agreement, 'hours').format('YYYY-MM-DDTHH:mm:ss');
+                          initial_sla = moment(ticket_param.start_Date).add(sla, 'hours').format('YYYY-MM-DDTHH:mm:ss');
                         }
 
                       }
 
                       //Adjusting due dates for weekends
                       for(let i = 0 ; i < number_of_days_to_work ;i++){
-                        if(this.$store.state.world_area_support == "MEA"){
-                          if(moment(this.formatStartDate).add(i+1, 'days').format('dddd') == "Friday" || moment(this.formatStartDate).add(i+1, 'days').format('dddd') == "Saturday")
-                            {
-                              
-                              initial_sla = moment(initial_sla).add(2, 'days').format('YYYY-MM-DDTHH:mm:ss');
-                              break;
-                            } 
-                        }else{                   
-                          if(moment(this.formatStartDate).add(i+1, 'days').format('dddd') == "Saturday" || moment(this.formatStartDate).add(i+1, 'days').format('dddd') == "Sunday" )
+                         if(moment(this.formatStartDate).add(i+1, 'days').format('dddd') == "Saturday" || moment(this.formatStartDate).add(i+1, 'days').format('dddd') == "Sunday" )
                             {
                               initial_sla = moment(initial_sla).add(2, 'days').format('YYYY-MM-DDTHH:mm:ss');
                               break;
                             } 
-                        }
                       }
-                       ticket_param.actual_due_date = initial_sla  
+
+                      if(this.ticket_Info.adjusted_Service_Level_Agreement != null && this.ticket_Info.adjusted_Service_Level_Agreement > ticket_param.service_Level_Agreement){
+                        let time_adjustment = this.ticket_Info.adjusted_Service_Level_Agreement - ticket_param.service_Level_Agreement
+                        ticket_param.actual_due_date = moment(initial_sla).add(time_adjustment,'hours')
+                      }else{
+                        ticket_param.actual_due_date = initial_sla        
+                      }
+                              
                   }
               }
             }
@@ -1705,7 +1711,7 @@ export default {
             ticket_param.period_ID =  SparrowService.pickPeriod(this.$store.state.periods[0], date_completion)
             setTimeout(() => {
                 if(this.ticket_Info.classification_ID == 2){
-                //Project              
+                  //Project              
                   let SLA = 0
 
                   if(this.ticket_Info.adjusted_Service_Level_Agreement != null && this.ticket_Info.adjusted_Service_Level_Agreement > ticket_param.service_Level_Agreement)
