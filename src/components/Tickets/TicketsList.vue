@@ -1461,7 +1461,6 @@ export default {
               //Loop to get the SLA of the ticket
               let number_of_days_to_work = 0
               for(let i =0 ; i <this.$store.state.complexitiesByTeam[0].length; i++){
-                
                   if(this.$store.state.complexitiesByTeam[0][i].id == this.ticket_Info.complexity_ID){
                       this.ticket_Info.service_Level_Agreement = this.$store.state.complexitiesByTeam[0][i].no_of_hrs
                       if(this.ticket_Info.service_Level_Agreement >= 9){
@@ -1489,7 +1488,8 @@ export default {
                       }
 
                       //Adjusting due dates for weekends
-                      for(let i = 0 ; i < number_of_days_to_work ;i++){
+                      for(let i = 0 ; i < number_of_days_to_work ;i++)
+                      {
                         if(this.$store.state.world_area_support == "MEA"){
                           if(moment(this.formatStartDate).add(i+1, 'days').format('dddd') == "Friday" || moment(this.formatStartDate).add(i+1, 'days').format('dddd') == "Saturday")
                             {           
@@ -2110,13 +2110,13 @@ export default {
         })
     },
     updateNF_Activity(){
-      let NF_Activity_promise = []
       if(this.validateNonFunctionalData() == true){ 
         this.dialog_saving_nfa = true
         var ts_hours = null
         var ts_minutes = null
         this.dialog_saving_nfa_text = "Updating your activity"
-          let nf_param ={
+
+        let nf_param ={
             id:this.nf_ID,
             title: this.non_functional.title,
             description: this.non_functional.description ,
@@ -2128,14 +2128,9 @@ export default {
             ticket_Owner_ID: this.$store.state.userID,
             status: this.non_functional.status,
             non_Functional_Classification_ID:this.non_functional.non_functional_classification_ID
-          }
-
-          //  NF_Activity_promise = new Promise((resolve, reject)=>{
-          //     setTimeout(resolve, 100, SparrowService.pickPeriod(this.$store.state.periods[0], this.formatNFStartDate));
-          //  })
-
+         }
           
-          if(this.non_functional.status == false){
+        if(this.non_functional.status == false){
             nf_param.period_ID = SparrowService.pickPeriod(this.$store.state.periods[0], this.formatNFStartDate)
             
             let start_date = this.formatNFStartDate_TimeSpent +" "+ this.nf_start_date_time
@@ -2153,42 +2148,43 @@ export default {
             this.$store.state.ongoingNonFunctional -= 1
           }
           SparrowService.putNonFunctionalTickets(this.nf_ID,nf_param).then(()=>{ 
-                    setTimeout(() => {                    
-                      SparrowService.getNonFunctionalTickets(this.$store.state.userID,this.$store.state.activeFY.label)
-                        .then(response => {    
-                            let activeNonFunctional = []   
-                              for(let i = 0 ; i < response.data.length;i++){
-                                if(response.data[i].status == true){
-                                      activeNonFunctional.push(response.data[i])
-                                    }
-                                }              
-                                this.$store.state.non_functional_tickets[0] = activeNonFunctional               
-                        })
-                    },1000);
-                      this.$store.dispatch({type:'fetchNonFunctionalActivities',id:this.$store.state.userID,fy:this.$store.state.activeFY.label})
-                      this.nf_start_date ="" 
-                      this.nf_date_completed = ""
-                      this.nf_start_date_time ="00:00"
-                      this.nf_date_completed_time="00:00"
-                      this.non_functional = this.createNon_Functional_Activity();
-                      this.nf_dialog = false;
-                      this.dialog_saving_nfa = false                      
-            })
+                setTimeout(() => {                    
+                   SparrowService.getNonFunctionalTickets(this.$store.state.userID,this.$store.state.activeFY.label)
+                    .then(response => {    
+                         let activeNonFunctional = []   
+                          for(let i = 0 ; i < response.data.length;i++){
+                            if(response.data[i].status == true){
+                                   activeNonFunctional.push(response.data[i])
+                                 }
+                            }              
+                         this.$store.state.non_functional_tickets[0] = activeNonFunctional               
+                    })
+                },1000);
+                  this.$store.dispatch({type:'fetchNonFunctionalActivities',id:this.$store.state.userID,fy:this.$store.state.activeFY.label})
+                  this.nf_start_date ="" 
+                  this.nf_date_completed = ""
+                  this.nf_start_date_time ="00:00"
+                  this.nf_date_completed_time="00:00"
+                  this.non_functional = this.createNon_Functional_Activity();
+                  this.nf_dialog = false;
+                  this.dialog_saving_nfa = false                      
+          })
       }
     },
 
     //Update all due dates of running tickets
     updateInPorgressTickets(addHours,addMinutes,nf_time_spent){
+
        let initial_due_date = ""
        let end_shift = 0
-       let ticket_param =null
+       let ticket_param = []
        let get_ticket_promise = []
        let activetickets = []
        this.dialog_saving_nfa = true
        this.dialog_saving_nfa_text = "Adjusting the Due date of your on-ging tickets"
       for(let i = 0; i < this.$store.state.activeTickets.length; i++){     
         get_ticket_promise.push(
-          SparrowService.getTicket(this.$store.state.activeTickets[i].id).then(response => {  
+          SparrowService.getTicket(this.$store.state.activeTickets[i].id).then(response => {         
 
                         initial_due_date = moment(response.data.actual_due_date).add(addHours, 'hours').add(addMinutes, 'minutes').format('YYYY-MM-DDTHH:mm:ss');
 
@@ -2207,39 +2203,45 @@ export default {
                            {
                               initial_due_date = moment(initial_due_date).add(15, 'hours').format('YYYY-MM-DDTHH:mm:ss');
                            }
-                      
-                        
 
-                ticket_param ={
-                  id:response.data.id,
-                  title: response.data.title,
-                  description: response.data.description ,
-                  actual_due_date: initial_due_date,
-                  service_rating:0, // null upon ticket creation
-                  start_Date:response.data.start_Date, // Date Recieved 
-                  date_Completion:null,  // Submission Date
-                  total_hrs:0, // null upon ticket creation
-                  running_time:response.data.running_time,
-                  requester: response.data.requester,
-                  world_area: response.data.world_area,
-                  service_Level_Agreement: response.data.service_Level_Agreement,
-                  adjusted_Service_Level_Agreement: parseFloat(response.data.service_Level_Agreement) + parseFloat(nf_time_spent),
-                  classification_ID:response.data.classification_ID,
-                  complexity_ID:response.data.complexity_ID,
-                  period_ID:response.data.period_ID,
-                  main_Category_ID: response.data.main_Category_ID,
-                  sub1_Category_ID: response.data.sub1_Category_ID,
-                  fY_ID:response.data.fY_ID,
-                  sub2_Category_ID: null,
-                  quality_Rating_ID:response.data.quality_Rating_ID, // null upon ticket creation
-                  ticket_Owner_ID: response.data.ticket_Owner_ID,
-                  ticket_Status_ID: response.data.ticket_Status_ID
-                }
-               SparrowService.putTicket(ticket_param.id,ticket_param)
+                        ticket_param.push(
+                            {
+                            id:response.data.id,
+                            title: response.data.title,
+                            description: response.data.description ,
+                            actual_due_date: initial_due_date,
+                            service_rating:0, // null upon ticket creation
+                            start_Date:response.data.start_Date, // Date Recieved 
+                            date_Completion:null,  // Submission Date
+                            total_hrs:0, // null upon ticket creation
+                            running_time:response.data.running_time,
+                            requester: response.data.requester,
+                            world_area: response.data.world_area,
+                            service_Level_Agreement: response.data.service_Level_Agreement,
+                            adjusted_Service_Level_Agreement: parseFloat(response.data.service_Level_Agreement) + parseFloat(nf_time_spent),
+                            classification_ID:response.data.classification_ID,
+                            complexity_ID:response.data.complexity_ID,
+                            period_ID:response.data.period_ID,
+                            main_Category_ID: response.data.main_Category_ID,
+                            sub1_Category_ID: response.data.sub1_Category_ID,
+                            fY_ID:response.data.fY_ID,
+                            sub2_Category_ID: null,
+                            quality_Rating_ID:response.data.quality_Rating_ID, // null upon ticket creation
+                            ticket_Owner_ID: response.data.ticket_Owner_ID,
+                            ticket_Status_ID: response.data.ticket_Status_ID
+                          }
+                        )
+                                     
             })
+           
           )
       }
       Promise.all(get_ticket_promise).then(()=>{
+           for(var i = 0 ;i < ticket_param.length  ; i++){
+            SparrowService.putTicket(ticket_param[i].id,ticket_param[i]).then(response =>{
+              console.log(response.status)
+            })            
+          }
           setTimeout(() => {
              this.$store.state.userTickets[0] = []
                 SparrowService.getTicketsByUser(this.$store.state.userID,this.$store.state.activeFY.label)
@@ -2264,7 +2266,7 @@ export default {
                         }, 1000);
                                 
                         })
-            },1000);
+            },2000);
       })
 
     },

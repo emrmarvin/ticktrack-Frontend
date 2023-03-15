@@ -89,6 +89,7 @@ methods:{
         requester: this.ticket.requester,
         world_area: this.ticket.world_area,
         service_Level_Agreement : this.ticket.service_Level_Agreement,
+        adjusted_Service_Level_Agreement:this.ticket.adjusted_Service_Level_Agreement,
         classification_ID:this.ticket.classification_ID,
         complexity_ID:this.ticket.complexity_ID,
         period_ID:null,

@@ -116,47 +116,47 @@ const routes = [
     path: '/manager-dashboard',
     name: 'DashboardManager',
     component: () => import('../components/Dashboards/DashboardManager.vue'),
-    beforeEnter: (to, from, next) => {
-      var authService = new AuthService();
-      var graphService = new GraphService();
-      authService.getToken().then(
-        (token) => {
-          if (token) {
-            graphService.getUserInfo(token).then(
-              (data) => {
-                SparrowService.getUserInfo(data.mail)
-                .then(response =>{
-                   if(response.data.length == 0){
-                    next('/register')
-                   }else if(response.data.length != 0) {
-                      if(response.data[0].status == false){
-                        next('/pending-approval')
-                      }
-                      else{
-                        if(response.data[0].roleID == 3){
-                          next('/sup-dashboard')
-                        }else if(response.data[0].roleID == 8){
-                          next('/manager-dashboard')
-                        }
-                        else{
-                          next()
-                        }
-                      }
-                   } 
-                })
-                .catch(error => {
-                  console.log(error.response)
-               })
-              },
-              (error) => {
-                console.error(error);
-              }
-            )
+    // beforeEnter: (to, from, next) => {
+    //   var authService = new AuthService();
+    //   var graphService = new GraphService();
+    //   authService.getToken().then(
+    //     (token) => {
+    //       if (token) {
+    //         graphService.getUserInfo(token).then(
+    //           (data) => {
+    //             SparrowService.getUserInfo(data.mail)
+    //             .then(response =>{
+    //                if(response.data.length == 0){
+    //                 next('/register')
+    //                }else if(response.data.length != 0) {
+    //                   if(response.data[0].status == false){
+    //                     next('/pending-approval')
+    //                   }
+    //                   else{
+    //                     if(response.data[0].roleID == 3){
+    //                       next('/sup-dashboard')
+    //                     }else if(response.data[0].roleID == 8){
+    //                       next('/manager-dashboard')
+    //                     }
+    //                     else{
+    //                       next()
+    //                     }
+    //                   }
+    //                } 
+    //             })
+    //             .catch(error => {
+    //               console.log(error.response)
+    //            })
+    //           },
+    //           (error) => {
+    //             console.error(error);
+    //           }
+    //         )
             
-          }
-          else next({name:'Log-In'})
-        })
-    }
+    //       }
+    //       else next({name:'Log-In'})
+    //     })
+    // }
   },
   {
     path: '/group-management',

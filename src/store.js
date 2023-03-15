@@ -1066,7 +1066,9 @@ export default new Vuex.Store({
       SET_TEAMS(state, teams) {
          state.teams.push(teams)
          for(var i = 0; i < teams.length; i++){
-            if(teams[i].manager_User_ID == 259 ){
+            //195
+            //259
+            if(teams[i].manager_User_ID == 195 ){
                state.opsManagerTeams.push(teams[i])
              }
          }
