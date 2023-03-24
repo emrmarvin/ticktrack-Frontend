@@ -27,18 +27,10 @@ created(){
     };
 },
 mounted(){
-  if(localStorage.getItem(this.$store.state.runningTickets[this.running_ticket_index].id)){
-    let runningTime = localStorage.getItem(this.$store.state.runningTickets[this.running_ticket_index].id)
-    this.updateTicketTime(runningTime)
-    this.$store.state.runningTickets[this.running_ticket_index].time = moment().hour(runningTime.split(":")[0]).minute(runningTime.split(":")[1]).second("00").format('HH:mm:ss')
-  }else{
     localStorage.setItem(this.$store.state.runningTickets[this.running_ticket_index].id,moment().hour(this.$store.state.runningTickets[this.running_ticket_index].hour).minute(this.$store.state.runningTickets[this.running_ticket_index].minute).second(this.$store.state.runningTickets[this.running_ticket_index].counter++).format('HH:mm:ss'))
     let runningTime = localStorage.getItem(this.$store.state.runningTickets[this.running_ticket_index].id)
     this.updateTicketTime(runningTime)
-    this.$store.state.runningTickets[this.running_ticket_index].time = moment().hour(runningTime.split(":")[0]).minute(runningTime.split(":")[1]).second("00").format('HH:mm:ss')
-  }
-
-  
+    this.$store.state.runningTickets[this.running_ticket_index].time = moment().hour(runningTime.split(":")[0]).minute(runningTime.split(":")[1]).second("00").format('HH:mm:ss')  
 }
 ,
 watch:{
