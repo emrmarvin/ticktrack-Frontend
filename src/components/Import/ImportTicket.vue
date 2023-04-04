@@ -190,8 +190,10 @@ export default {
         "classification_ID" :"Transactional",
         "world_area":"Global",
         "requester":"Karsanbhai Lal",
+        "actual_time_spent":"",
         "adjust_SLA":"5",
         "FY":"FY22"
+        
       },
       {
         "period_ID" :"P10",
@@ -207,6 +209,7 @@ export default {
         "classification_ID" :"Project",
         "world_area":"Global",
         "requester":"Karsanbhai Lal",
+        "actual_time_spent":"",
         "adjust_SLA":"",
         "FY":"FY22"
       },
@@ -224,6 +227,7 @@ export default {
         "classification_ID" :"",
         "world_area":"",
         "requester":"",
+        "actual_time_spent":"",
         "adjust_SLA":"",
         "FY":""
       }
@@ -242,8 +246,10 @@ export default {
         classification_ID :"Classification",
         world_area:"World Area",
         requester:"Requester",
+        actual_time_spent:"Actual Time Spent",
         adjust_SLA:"Non-Functional (No. of Hrs)",
         FY:"FY"
+       
         
       },
       template_fields:[
@@ -260,6 +266,7 @@ export default {
         "classification_ID",
         "world_area",
         "requester",
+        "actual_time_spent",
         "adjust_SLA",
         "FY"
       ]
@@ -427,8 +434,8 @@ export default {
                                   this.upload_errors.push("SLA should not be empty for transactional tickets")
                           }
                           else{
-                            if(this.csvBody[ticket][13] != ""){
-                              sla = parseInt(this.csvBody[ticket][4]) + parseInt(this.csvBody[ticket][13])
+                            if(this.csvBody[ticket][14] != ""){
+                              sla = parseInt(this.csvBody[ticket][4]) + parseInt(this.csvBody[ticket][14])
                             }else{
                               sla = this.csvBody[ticket][4]
                             } 
@@ -445,7 +452,7 @@ export default {
                             date_Completion : this.csvBody[ticket][6],
                             total_hrs : Computations.TimeSpentCalculation(this.csvBody[ticket][2],this.csvBody[ticket][6]) ,
                             service_Level_Agreement : sla,
-                            adjusted_Service_Level_Agreement:parseInt(this.csvBody[ticket][13]),
+                            adjusted_Service_Level_Agreement:parseInt(this.csvBody[ticket][14]),
                             classification_ID :this.getClassificationID(this.csvBody[ticket][10]),
                             complexity_ID : this.getComplexityID(this.csvBody[ticket][3]),
                             period_ID :this.getPeriodID(this.csvBody[ticket][0]),
@@ -456,7 +463,8 @@ export default {
                             requester:this.csvBody[ticket][12],
                             ticket_Owner_ID : this.$store.state.userID,
                             ticket_Status_ID : this.$store.state.completedID,
-                            fy_ID: this.getFYID(this.csvBody[ticket][14])
+                            fy_ID: this.getFYID(this.csvBody[ticket][15]),
+                            running_time:parseInt(this.csvBody[ticket][13])
                         })
                     })
           )
@@ -472,6 +480,7 @@ export default {
                     new Promise((resolve)=>{
                       this.$store.dispatch("addTicket", ticketsToSave[t]).then(() => {
                         this.ticket_saved_count += 1
+                        console.log(ticketsToSave[t])
                         resolve({
                           //
                           Done:"Done"

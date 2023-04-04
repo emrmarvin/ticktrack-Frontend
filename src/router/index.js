@@ -287,9 +287,7 @@ const routes = [
                         next('/pending-approval')
                       }
                       else{
-                        if(response.data[0].roleID == 3){
-                          next('/sup-dashboard')
-                        }else if(response.data[0].roleID == 8){
+                       if(response.data[0].roleID == 8){
                           next('/manager-dashboard')
                         }
                         else{
@@ -333,9 +331,7 @@ const routes = [
                         next('/pending-approval')
                       }
                       else{
-                        if(response.data[0].roleID == 3){
-                          next('/sup-dashboard')
-                        }else if(response.data[0].roleID == 8){
+                         if(response.data[0].roleID == 8){
                           next('/manager-dashboard')
                         }
                         else{
@@ -379,9 +375,7 @@ const routes = [
                         next('/pending-approval')
                       }
                       else{
-                        if(response.data[0].roleID == 3){
-                          next('/sup-dashboard')
-                        }else if(response.data[0].roleID == 8){
+                         if(response.data[0].roleID == 8){
                           next('/manager-dashboard')
                         }
                         else{
