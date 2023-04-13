@@ -39,7 +39,6 @@ export default {
     this.$store.dispatch('fetchTicketStatus')
     this.$store.dispatch('fetchShiftSchedules')
     this.$store.dispatch('fetchRoles')
-    this.$store.dispatch('fetchTeams')  
     this.$store.dispatch('fetchNonFunctionalClassifications')
     this.$store.dispatch('fetchUserInfo')
   },

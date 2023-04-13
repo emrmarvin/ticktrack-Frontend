@@ -153,12 +153,11 @@ export default new Vuex.Store({
                
             })
       },
-      fetchTeams({
-         commit
-      }) {
+      fetchTeams({commit},userID) {
          SparrowService.getTeams()
             .then(response => {
-               commit('SET_TEAMS', response.data)
+               let teams = response.data
+               commit('SET_TEAMS', {teams,userID});
             })
       },
       addTeam({
@@ -791,6 +790,7 @@ export default new Vuex.Store({
                               if (response.data[0].roleID == 1) {
                                  //Admin
                                  dispatch('fetchUsers')
+                                 dispatch('fetchTeams',response.data[0].id)
                               } else if (response.data[0].roleID == 2) {
                                  //Team Lead
                                  dispatch('fetchUsersByTeam', response.data[0].teamID)
@@ -801,6 +801,9 @@ export default new Vuex.Store({
                                  dispatch('fetchUserNotifications', response.data[0].id)
                                  dispatch('fetchUsersByTeams', response.data[0].team.supervisor_User_ID)
                                  dispatch('fetchSuperviorTeams', response.data[0].team.supervisor_User_ID)
+                              }else if(response.data[0].roleID == 8){
+                                 //Manager
+                                 dispatch('fetchTeams', response.data[0].id)  
                               }
                            
                            })
@@ -1063,14 +1066,14 @@ export default new Vuex.Store({
       SET_SUPERVISOR_TEAMS(state, teams) {
          state.supervior_teams.push(teams)
       },
-      SET_TEAMS(state, teams) {
+      SET_TEAMS(state, {teams,userID}) {
          state.teams.push(teams)
          for(var i = 0; i < teams.length; i++){
             //195 - Vivs ID
             //259 - James ID
-            if(teams[i].manager_User_ID == 259 ){
+            if(teams[i].manager_User_ID ==  userID ){
                state.opsManagerTeams.push(teams[i])
-             }
+            }
          }
       },
       SET_SHIFTSCHEDULES(state, shift_schedules) {
