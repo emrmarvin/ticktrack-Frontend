@@ -6,6 +6,7 @@ import SparrowService from '@/services/SparrowService'
 import AuthService from "./services/AuthService";
 import GraphService from "./services/GraphService";
 import axios from "axios";
+import moment from 'moment';
 
 
 Vue.use(Vuex)
@@ -996,12 +997,20 @@ export default new Vuex.Store({
       }, UserId) {
          let CS = []
          SparrowService.getChangeShiftByUser(UserId).then(response => {
+            var currentYear = moment().year();
+            for(var cs_fy = 0; response.data.length > cs_fy; cs_fy++ ){
+               var csYear = response.data[cs_fy].cS_Start_Time.split("-")
+               if(csYear[0] != currentYear){
+                  response.data.splice(cs_fy,1)
+               }
+            }
             CS =  response.data.sort(function(a, b) {
                var CSA = a.cS_Start_Time;
                var CSB = b.cS_Start_Time;
                return (CSA < CSB) ? -1 : (CSA > CSB) ? 1 : 0;
            });
                commit('SET_USER_CHANGE_SHIFT', CS)
+              
             })
             .catch(error => {
                console.log(error.response)

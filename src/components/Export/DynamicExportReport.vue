@@ -90,7 +90,7 @@ data() {
       return WA;
     },
     formatDisplayDate(value){
-       return moment(value).format("MMMM DD YYYY h:mm:ss a")
+       return moment(value).format("MM/DD/YYYY HH:mm")
     },
 
   }
