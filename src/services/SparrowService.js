@@ -1,5 +1,6 @@
 import axios from 'axios'
 import moment from 'moment'
+import Store from "@/store";
 
 const apiClient = axios.create({
   baseURL: process.env.VUE_APP_API_URL,
@@ -10,17 +11,39 @@ const apiClient = axios.create({
   }
 })
 
+const adoClient = axios.create({
+  
+  baseURL:"https://dev.azure.com/EmersonAutomationSolutions/",
+  //baseURL:'https://dev.azure.com/EmersonAutomationSolutions/8776a78c-cb76-4c95-9eda-c6f193d1afd7/_apis/wit/workItems/1751421',
+  auth:{
+    username:'Leonard.Viva@Emerson.com',
+    password:sessionStorage.getItem("azurePAT")
+  }
+})  
+
+const adoLogin = axios.create({
+  baseURL:"https://vssps.dev.azure.com/EmersonAutomationSolutions/_apis/tokens/pats?api-version=7.1-preview.1"
+})
+
 
 export default {
 
   ///// Period Calculation //////
   pickPeriod(periods,date_completed){
     for(let p = 0 ; p < periods.length ; p++){
-      if(moment(date_completed).format('YYYY-MM-DD') >= moment(periods[p].start_Date).format('YYYY-MM-DD') && moment(date_completed).format('YYYY-MM-DD') <= moment(periods[p].end_Date).format('YYYY-MM-DD')){
+      if(moment(date_completed).format('YYYY-MM-DD') >= moment(periods[p].start_Date).format('YYYY-MM-DD') && 
+         moment(date_completed).format('YYYY-MM-DD') <= moment(periods[p].end_Date).format('YYYY-MM-DD')){
         return periods[p].id;
       }
     }
-
+  },
+  pickPeriod_Label(periods,date_completed){
+    for(let p = 0 ; p < periods.length ; p++){
+      if(moment(date_completed).format('YYYY-MM-DD') >= moment(periods[p].start_Date).format('YYYY-MM-DD') && 
+         moment(date_completed).format('YYYY-MM-DD') <= moment(periods[p].end_Date).format('YYYY-MM-DD')){
+        return periods[p].abbreviation;
+      }
+    }
   },
 
   /////// Image Services ///////
@@ -79,6 +102,7 @@ export default {
 
 
   //////////////// API endpoints Services ////////////////////////
+
 
   getProfiles() {
     return apiClient.get("/ProfileImages");
@@ -452,5 +476,13 @@ export default {
   deleteChangeShift(id){
     return apiClient.delete('/ChangeshiftInfoes/'+ id)
   },
+
+  getAzureRequests(){
+    return adoClient.get('EMR-ENT-MSOL-DCX-WebProjectExecution/_apis/wit/wiql/22950ab7-7ee5-43fd-a9ae-4b639f8dde30?api-version=7.1-preview.2')
+    //return adoClient.get('EMR-ENT-MSOL-DCX-WebProjectExecution/_apis/wit/wiql/f6ef807a-22e3-4586-a0b0-1dbc114278e5?api-version=7.1-preview.2')
+  },
+  getAzureWorkItemDetails(workitem_id){
+    return adoClient.get('8776a78c-cb76-4c95-9eda-c6f193d1afd7/_apis/wit/workItems/'+ workitem_id)
+  }
 
 }

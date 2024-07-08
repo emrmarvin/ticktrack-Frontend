@@ -33,6 +33,19 @@
       </div>
     </form>  
     <br>
+    <!--Get Data from Azure-->
+    <v-btn
+      class="primary"
+      height="50px"
+      color="success"
+      @click="acquireAzureToken()"
+      id="deleteall"
+      v-if="$store.state.teamID == 2"
+    >
+      <!-- <v-icon style="background-color:white;border-radius:50px;margin-right:5px" color="primary">mdi-plus</v-icon> Add New Non-Functional Activity -->
+      <v-icon color="white"> mdi-import </v-icon> Import Data from Azure DevOps
+    </v-btn>
+    <br>
     <v-chip
          class="ma-2"
          label 
@@ -122,7 +135,47 @@
                   </v-card-text>
                 </v-card>   
    </v-dialog>
+
+   <!--Import from ADO-->
+    <v-dialog v-model="dialog_azure_import" persistent width="100%">
+      <v-card>
+        <v-card-title class="headline" style="color: white; background-color: #004b8d" >
+          IMPORT FROM ADO
+        </v-card-title>
+        <v-card-text>
+          <div style="font-size: 15px;" class="mb-5 mt-5 text_color--text">
+            <template>
+                  <v-data-table
+                    height="100%"
+                    fixed-header
+                    :headers="azureHeaders"
+                    :items="azure_work_items"
+                    class="elevation-1"
+                    item-key="ADO_ID"
+                    :loading="loading_azure_import"
+                  >
+                  </v-data-table>
+                </template>
+          </div>
+          
+          <v-card-actions style="justify-content:center">
+            <v-btn
+            type="submit"
+            @click="saveAzureItem()"
+            style="color: white"
+            color="#004b8d"
+            >SAVE</v-btn
+          >
+          <v-btn text @click="dialog_azure_import = false" style="color: #004b8d"
+            >Close</v-btn
+          >
+          </v-card-actions>
+        </v-card-text>
+      </v-card>
+    </v-dialog>
   </div>
+
+  
 </template>
 
 <script>
@@ -130,6 +183,7 @@ import Encoding from "encoding-japanese";
 import SparrowService from "@/services/SparrowService.js";
 import Computations from "@/services/Computations.js";
 import moment from 'moment'
+import AuthService from "@/services/AuthService.js";
 export default {
   name: "CsvLoader",
   props: {
@@ -159,6 +213,24 @@ export default {
   },
   data() {
     return {
+      azureHeaders: [
+        { text: "FY", value: "FY" },
+        { text: "Period", value: "Period" },
+        { text: "Title", value: "Title" },
+        { text: "State", value: "State" },
+        { text: "Date Start", value: "DateStart" },
+        { text: "Date Completed", value:"DateCompleted"},
+        { text: "Complexity", value: "Complexity" },
+        { text: "Quality Rating", value: "QualityRating" },
+        { text: "Request Category", value: "RequestCategory" },
+        { text: "Request Type", value: "RequestType" },
+        { text: "Classification", value: "Classification" },
+        { text: "SLA", value: "SLA" },
+        { text: "TIme Spent", value:"TImeSpent"},
+        { text: "Service Rating", value: "ServiceRating"}
+      ],
+      dialog_azure_import:false,
+      azure_work_items:[],
       headerRowCount: 1,
       labelHeaderRowCount: "",
       fileName: " ",
@@ -175,6 +247,7 @@ export default {
       post_saving_dialog_text:"",
       dialog_announcement:true,
       ticket_saved_count : 0,
+      loading_azure_import:false,
       templateExport:[
         {
         "period_ID" :"P10",
@@ -273,6 +346,161 @@ export default {
     };
   },
   methods: {
+     acquireAzureToken(){
+      var authService = new AuthService();
+      authService.getAzureToken().then((azuretoken)=>{
+        this.azureGetItem(azuretoken)
+      });
+    },
+    azureGetItem(token){
+        this.loading_azure_import =  true
+        this.dialog_azure_import =  true
+      setTimeout(() => {
+        sessionStorage.setItem("azurePAT",token)
+        SparrowService.getAzureRequests().then((response)=>{
+        for(let i = 0 ; response.data.workItems.length > i ; i++){
+          SparrowService.getAzureWorkItemDetails(response.data.workItems[i].id).then((data)=>{
+            var date_started = moment(data.data.fields["Microsoft.VSTS.Common.ActivatedDate"]).format("MM/DD/YYYY HH:mm:ss")
+            var date_completed = moment(data.data.fields["Microsoft.VSTS.Common.StateChangeDate"]).format("MM/DD/YYYY HH:mm:ss")  
+            var ms = moment(date_completed,"YYYY/MM/DD HH:mm").diff(moment(date_started,"YYYY/MM/DD HH:mm"));
+            var d = moment.duration(ms);
+            this.azure_work_items.push( 
+              {
+                "ADO_ID":response.data.workItems[i].id,
+                "FY":"FY24",
+                "Period":SparrowService.pickPeriod_Label(this.$store.state.periods[0],date_completed),
+                "Title":data.data.fields["System.Title"],
+                "State":data.data.fields["System.State"],
+                "DateStart":date_started,
+                "DateCompleted":date_completed ,
+                "Complexity":"Story",
+                "QualityRating":"3",
+                "SLA":24,
+                "RequestCategory":data.data.fields["Custom.MSOLRequestType"],
+                "PageType":data.data.fields["Custom.PageType"],
+                "RequestType":data.data.fields["Custom.MSOLPlatform"],
+                "Classification":"Transactional",
+                "TImeSpent": data.data.fields["Custom.MSOLActualEffort"],
+                "ServiceRating":Computations.serviceRatingComputation(data.data.fields["Custom.MSOLActualEffort"],24),
+              }
+              )
+            this.loading_azure_import =  false
+            //console.log("azure_work_items",this.azure_work_items)
+          })
+        }
+        
+      })
+      }, 4000);
+    },
+    saveAzureItem(){
+      let ticketsToSave = []
+      let ticketsToSave_Promise = []
+      let savingTicket_Promise = []
+      this.dialog_saving = true
+        for(let ticket = 0; ticket < this.azure_work_items.length; ticket++){
+          let sub1_id = null
+          let id = 0
+          let main_category_id = 0
+          let main_category_text = ""
+
+          if(this.azure_work_items[ticket].RequestCategory == "Create New Page"){
+            if(this.azure_work_items[ticket].PageType == "PDPs"){
+              main_category_id = this.getMainCategoryID("Create New Product Page")
+              main_category_text = "Create New Product Page"
+            }else{
+              main_category_id = this.getMainCategoryID("Create New Page")
+              main_category_text = "Create New Page"
+            }
+          } else if(this.azure_work_items[ticket].RequestCategory == "Edit Existing Page"){
+            if(this.azure_work_items[ticket].PageType == "PDPs"){
+              main_category_id = this.getMainCategoryID("Edit Product Page")
+              main_category_text = "Edit Product Page"
+            }else{
+              main_category_id = this.getMainCategoryID("Edit Content Page")
+              main_category_text = "Edit Content Page"
+            }
+          } else if(this.azure_work_items[ticket].RequestCategory == "Bug"){
+              main_category_id = this.getMainCategoryID("Report a Bug")
+              main_category_text = "Report a Bug"
+          }else if(this.azure_work_items[ticket].RequestCategory == "Delete Digital Asset/Page"){
+              main_category_id = this.getMainCategoryID("Delete Digital Page/Asset")
+              main_category_text = "Delete Digital Page/Asset"
+          }else{
+             main_category_id = this.getMainCategoryID(this.azure_work_items[ticket].RequestCategory)
+             main_category_text = this.azure_work_items[ticket].RequestCategory
+          }
+
+          ticketsToSave_Promise.push(
+            
+                     SparrowService.getTicketSub1_CategoryByMainCategory(main_category_id)
+                    .then((response) => {
+
+                        for(let s = 0; s < response.data.length; s++){
+                          if(response.data[s].label.toLowerCase() == this.azure_work_items[ticket].RequestType.toLowerCase()){
+                            id = response.data[s].id
+                            sub1_id = response.data[s].id
+                          }
+                        }
+                          ticketsToSave.push({
+                            title :this.azure_work_items[ticket].Title,
+                            actual_due_date:this.ActualDueDate(this.azure_work_items[ticket].DateStart,24) ,                 
+                            service_rating:this.azure_work_items[ticket].ServiceRating,
+                            start_Date :this.azure_work_items[ticket].DateStart,
+                            date_Completion : this.azure_work_items[ticket].DateCompleted,
+                            total_hrs : this.azure_work_items[ticket].TImeSpent,
+                            service_Level_Agreement : 24,
+                            adjusted_Service_Level_Agreement:0,
+                            classification_ID :this.getClassificationID(this.azure_work_items[ticket].Classification),
+                            complexity_ID : this.getComplexityID(this.azure_work_items[ticket].Complexity),
+                            period_ID :SparrowService.pickPeriod(this.$store.state.periods[0],this.azure_work_items[ticket].DateCompleted),
+                            main_Category_ID : this.getMainCategoryID(main_category_text),
+                            sub1_Category_ID : sub1_id,
+                            quality_Rating_ID :this.getQualityID(this.azure_work_items[ticket].QualityRating),
+                            world_area:null,
+                            requester:null,
+                            ticket_Owner_ID :this.$store.state.userID,
+                            ticket_Status_ID : this.$store.state.completedID,
+                            fy_ID: this.getFYID(this.azure_work_items[ticket].FY),
+                            running_time:null
+                        })
+                      }),
+                      
+          )
+        }
+        setTimeout(() => {
+           Promise.all(ticketsToSave_Promise).then(()=>{
+              //console.log("ticketToSave",ticketsToSave)
+              for(let t = 0; t < ticketsToSave.length; t++){
+                  savingTicket_Promise.push(
+                    new Promise((resolve)=>{
+                      this.$store.dispatch("addTicket", ticketsToSave[t]).then(() => {
+                        this.ticket_saved_count += 1
+                        console.log(ticketsToSave[t])
+                        resolve({
+                          //
+                          Done:"Done"
+                          
+                        })
+                      })
+                    })                
+                  )
+              }
+               setTimeout(() => {
+                Promise.all(savingTicket_Promise).then((Done)=>{   
+                  this.$store.dispatch("fetchUserTickets",this.$store.state.userID).then(()=>{
+                    if(this.ticket_saved_count == this.azure_work_items.length){
+                      this.post_saving_dialog = true
+                      this.post_saving_dialog_text = "Tickets saved!"
+                      this.dialog_saving = false
+                      this.dialog_azure_import = false
+                    } 
+                  })     
+                  
+                })  
+              }, 5000);
+           })
+        }, 3000);
+    },
     loadSuccess: function(result) {
       this.csvHeader = result.csvHeader;
       this.csvBody = result.csvBody;
@@ -340,6 +568,7 @@ export default {
       for(let p = 0; p < this.$store.state.periods[0].length; p++){
           if(this.$store.state.periods[0][p].abbreviation.toLowerCase() == period.toLowerCase()){
             id = this.$store.state.periods[0][p].id
+            console.log("id",id)
             return this.$store.state.periods[0][p].id
           }
       }
