@@ -1,15 +1,14 @@
 <template>
-  <v-row align="center" no-gutters>
-    <v-row class="mb-6">
+  <v-row style="justify-content:right;" no-gutters>
+    <v-row class="mb-6" style="justify-content:right;">
 
-
-      <v-col class="cols-12" md="6">
-        <v-card elevation="5" min-width="500" min-height="100">
-          <v-list-item style="padding:0">
-            <v-list-item-content class="card"  style="height:100px;padding-left:35px;padding-top:20px;padding-bottom:100px">
+      <v-col class="cols-12" md="3" >
+        <v-card elevation="5" min-width="150" min-height="10">
+          <v-list-item style="padding:0;">
+            <v-list-item-content class="ongoing"  style="height:100px;padding-left:35px;padding-top:20px;padding-bottom:100px; ">
               <v-list-item-title>
-                <span style="font-size:15px!important;color:#aaaaaa" class="title">On-Going Tickets </span><br><br>
-                <span style="font-size:40px!important;" class="title text-center card_text--text">{{TotalActiveTicket}}</span>
+                <span style="font-size:15px!important;color:white" class="title">On-Going Tickets </span><br><br>
+                <span style="font-size:40px!important;color:white" class="title text-center">{{TotalActiveTicket}}</span>
               </v-list-item-title>
             </v-list-item-content>
           </v-list-item>
@@ -17,38 +16,26 @@
       </v-col>
 
 
-      <v-col class="cols-12" md="6">
-        <v-card elevation="5" min-width="500" min-height="100">
+      <v-col class="cols-12" md="3">
+        <v-card elevation="5" min-width="200" min-height="100">
           <v-list-item style="padding:0">
-            <v-list-item-content class="card"  style="height:100px;padding-left:35px;padding-top:20px;padding-bottom:100px">
+            <v-list-item-content class="completed"  style="height:100px;padding-left:35px;padding-top:20px;padding-bottom:100px">
               <v-list-item-title>
-                <span style="font-size:15px!important;color:#aaaaaa" class="title">Total Completed Tickets </span><br><br>
-                <span style="font-size:40px!important;" class="title text-center card_text--text">{{TotalCompletedTickets}}</span>
+                <span style="font-size:15px!important;color:white" class="title">Total Completed Tickets </span><br><br>
+                <span style="font-size:40px!important;color:white" class="title text-center">{{TotalCompletedTickets}}</span>
               </v-list-item-title>
             </v-list-item-content>
           </v-list-item>
         </v-card>
       </v-col>
 
-      <v-col class="cols-12" md="6">
-        <v-card elevation="5" min-width="500" min-height="100">
+      <v-col class="cols-12" md="3">
+        <v-card elevation="5" min-width="200" min-height="100">
           <v-list-item style="padding:0">
-            <v-list-item-content class="card"  style="height:100px;padding-left:35px;padding-top:20px;padding-bottom:100px">
+            <v-list-item-content class="nf"  style="height:100px;padding-left:35px;padding-top:20px;padding-bottom:100px">
               <v-list-item-title>
-                <span style="font-size:15px!important;color:#aaaaaa" class="title">On-Going Non Functional Activities</span><br><br>
-                <span style="font-size:40px!important;" class="title text-center card_text--text">{{TotalOnGoingNonFunctional}}</span>
-              </v-list-item-title>
-            </v-list-item-content>
-          </v-list-item>
-        </v-card>
-      </v-col>
-      <v-col class="cols-12" md="6"> 
-        <v-card elevation="5" min-width="500" min-height="100">
-          <v-list-item style="padding:0">
-            <v-list-item-content class="card"  style="height:100px;padding-left:35px;padding-top:20px;padding-bottom:100px">
-              <v-list-item-title>
-                <span style="font-size:15px!important;color:#aaaaaa" class="title">Total Overdue Tickets</span><br><br>
-                <span style="font-size:40px!important;" class="title text-center card_text--text">0</span>
+                <span style="font-size:15px!important;color:white" class="title">On-Going Non Functional Activities</span><br><br>
+                <span style="font-size:40px!important;color:white" class="title text-center">{{TotalOnGoingNonFunctional}}</span>
               </v-list-item-title>
             </v-list-item-content>
           </v-list-item>
@@ -66,7 +53,6 @@ export default {
   props:[
     "TotalActiveTicket",
     "TotalCompletedTickets",
-    "TotalOverDueTickets",
     "TotalOnGoingNonFunctional"
   ],
   data(){
@@ -77,3 +63,16 @@ export default {
   }
 };
 </script>
+<style scoped>
+.v-application .ongoing {
+     background-color: #004B8D !important; 
+     color: white !important;
+}
+.v-application .completed {
+     background-color: #00573D !important; 
+     color: white !important;
+}
+.v-application .nf {
+     background-color: #F8B11E !important; 
+}
+</style>

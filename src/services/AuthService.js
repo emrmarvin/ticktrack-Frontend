@@ -5,14 +5,18 @@ export default class AuthService {
     let PROD_REDIRECT_URI = process.env.VUE_APP_REDIRECT_URI;
     let redirectUri = process.env.VUE_APP_REDIRECT_URI;
 
+
     if (window.location.hostname !== '127.0.0.1') {
       redirectUri = PROD_REDIRECT_URI;
     }
     this.applicationConfig = {
       clientID: process.env.VUE_APP_CLIENT_ID,
       postLogoutRedirectUri: process.env.VUE_APP_POST_LOGOUT_REDIRECT_URI,
-      graphScopes: ['user.read']
+      graphScopes: ['user.read'],
+      Scope: ['499b84ac-1321-427f-aa17-267ca6975798/.default']
     };
+
+
     this.app = new Msal.UserAgentApplication(
       this.applicationConfig.clientID,
       '',
@@ -52,10 +56,48 @@ export default class AuthService {
     return this.app.acquireTokenSilent(this.applicationConfig.graphScopes).then(
       accessToken => {
         return accessToken;
+        
       },
       error => {
         return this.app
           .acquireTokenPopup(this.applicationConfig.graphScopes)
+          .then(
+            accessToken => {
+              return accessToken;
+            },
+            err => {
+              console.error(err);
+            }
+          );
+      }
+    );
+  };
+
+  Azurelogin() {
+    return this.app.loginRedirect(this.applicationConfig.Scopes).then(
+      idToken => {
+        const user = this.app.getUser();
+        if (user) {
+          
+          return user;
+        } else {
+          return null;
+        }
+      },
+      () => {
+        return null;
+      }
+    );
+  };
+
+  getAzureToken() {
+    return this.app.acquireTokenSilent(this.applicationConfig.Scope).then(
+      accessToken => {
+        return accessToken;
+      },
+      error => {
+        return this.app
+          .acquireTokenPopup(this.applicationConfig.Scope)
           .then(
             accessToken => {
               return accessToken;

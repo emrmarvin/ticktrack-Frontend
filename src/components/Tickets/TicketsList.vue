@@ -44,7 +44,7 @@
         color="primary"
         >mdi-plus</v-icon
       >
-      Add New Non-Functional Activity
+      Add New Non-Functional Activities
     </v-btn>
     <v-btn
       class="primary ml-5"
