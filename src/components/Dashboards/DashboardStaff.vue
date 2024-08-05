@@ -62,12 +62,12 @@ export default {
     return {
       ProductsPerBU: {
         data: {
-          labels: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
-          series: [[50, 20, 30, 100, 190]],
+          labels: ["P1", "P2", "P3", "P4", "P5","P6", "P7", "P8", "P9", "P10", "P11", "P12"],
+          series: [[50, 20, 30, 100, 190,50, 20, 30, 100, 190,0,0]],
         },
         options: {
           axisX: {
-            showGrid: false,
+            showGrid: true,
           },
           low: 0,
           high: 200,
@@ -124,8 +124,21 @@ export default {
           ],
         ],
       },
+      TicketCountPerPeriod:[]
     };
   },
+  mounted(){
+    this.getTicketCountPerPeriod()
+  },
+  methods:{
+    getTicketCountPerPeriod(){
+      setTimeout(() => {
+        console.log("count", this.$store.state.userTickets[0])
+      }, 3000);
+      
+      this.TicketCountPerPeriod.push()
+    }
+  }
 };
 </script>
 
