@@ -92,9 +92,9 @@
         <v-btn icon @click="getBusinessUnit(business_unit.id)">
           <v-icon color="grey lighten-1">mdi-pencil</v-icon>
         </v-btn>
-        <v-btn icon  @click="getBUToDelete(business_unit.id)">
+        <!-- <v-btn icon  @click="getBUToDelete(business_unit.id)">
           <v-icon color="grey lighten-1">mdi-delete</v-icon>
-        </v-btn>
+        </v-btn> -->
       </v-list-item-action>
     </v-list-item>
   </v-card>
