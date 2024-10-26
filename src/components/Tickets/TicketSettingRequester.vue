@@ -85,9 +85,9 @@
         <v-btn icon @click="getRequester(requester.id)">
           <v-icon color="grey lighten-1">mdi-pencil</v-icon>
         </v-btn>
-        <v-btn icon  @click="getRequesterToDelete(requester.id)">
+        <!-- <v-btn icon  @click="getRequesterToDelete(requester.id)">
           <v-icon color="grey lighten-1">mdi-delete</v-icon>
-        </v-btn>
+        </v-btn> -->
       </v-list-item-action>
     </v-list-item>
   </v-card>

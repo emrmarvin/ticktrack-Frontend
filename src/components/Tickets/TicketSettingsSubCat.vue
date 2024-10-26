@@ -162,9 +162,9 @@
         <v-btn icon @click="getSubCategory(sub1_Category.id)">
           <v-icon color="grey lighten-1">mdi-pencil</v-icon>
         </v-btn>
-        <v-btn icon @click="getSubCategoryToDelete(sub1_Category.id)">
+        <!-- <v-btn icon @click="getSubCategoryToDelete(sub1_Category.id)">
           <v-icon color="grey lighten-1">mdi-delete</v-icon>
-        </v-btn>
+        </v-btn> -->
       </v-list-item-action>
     </v-list-item>
     </div>

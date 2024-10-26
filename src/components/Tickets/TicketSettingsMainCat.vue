@@ -187,6 +187,7 @@ export default {
     }
   },
   mounted(){
+    
   },
   methods: {
     validateMainCategory(){
@@ -262,18 +263,44 @@ export default {
     },
     getMainCategoryToDelete(id){
       this.delete_dialog = true
-      this.maincat_id = id
+      this.maincatPromise.push(
+        SparrowService.getTicketMain_Category(id).then(response => {
+          this.maincat_id = response.data[0].id
+          this.main_Category.abbreviation = response.data[0].abbreviation
+          this.main_Category.label = response.data[0].label
+          this.main_Category.description = response.data[0].description
+          this.main_Category.teamID = response.data[0].teamID
+        })
+      ) 
     },
     deleteMainCategory(){
-      SparrowService.deleteTicketTicketMain_Category(this.maincat_id).then(()=>{
-        this.delete_dialog = false
-        setTimeout(() => {
-             this.$store.dispatch('fetchTicketMainCategoriesByTeam',this.$store.state.teamID)
+      let params ={
+        id:this.maincat_id,
+        abbreviation:this.main_Category.abbreviation,
+        label: this.main_Category.label,
+        description: "Deleted",
+        created_By:this.$store.state.userID,
+        teamID:this.main_Category.teamID
+      }
+      SparrowService.putTicketMain_Category(this.maincat_id, params).then(()=>{
+          setTimeout(() => {
+            this.$store.dispatch('fetchTicketMainCategoriesByTeam',this.$store.state.teamID)
             SparrowService.getTicketMain_CategoryByTeam(this.$store.state.teamID).then(response => {
-              this.$store.state.main_Categories_by_team[0] = response.data;
+
+              var main_cat = []
+                for(var i = 0; i < response.data.length; i++){
+                    if(response.data[i].description != "Deleted"){
+                      main_cat.push(response.data[i])
+                    }
+                }
+         
+              this.$store.state.main_Categories_by_team[0] = main_cat
+              document.location.reload()
+              this.main_Category = this.createMain_category();
             })
         }, 1500);
       })
+      this.delete_dialog = false;
     },
     close() {
       this.dialog = false;

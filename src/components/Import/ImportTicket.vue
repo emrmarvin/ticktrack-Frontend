@@ -353,6 +353,7 @@ export default {
       });
     },
     azureGetItem(token){
+       console.log("UserID",this.$store.state.userID)
         this.loading_azure_import =  true
         this.dialog_azure_import =  true
       setTimeout(() => {
@@ -364,11 +365,18 @@ export default {
             var date_completed = moment(data.data.fields["Microsoft.VSTS.Common.StateChangeDate"]).format("MM/DD/YYYY HH:mm:ss")  
             var ms = moment(date_completed,"YYYY/MM/DD HH:mm").diff(moment(date_started,"YYYY/MM/DD HH:mm"));
             var d = moment.duration(ms);
+            var classification = ""
+            
+            if(data.data.fields["Custom.MSOLSize"] == "XL" || data.data.fields["Custom.MSOLSize"] == "Large"){
+              classification = "Project"
+            }else{
+              classification = "Transactional"
+            }
             this.azure_work_items.push( 
               {
                 "ADO_ID":response.data.workItems[i].id,
                 "FY":"FY24",
-                "Period":SparrowService.pickPeriod_Label(this.$store.state.periods[0],date_completed),
+                "Period":"P12",
                 "Title":data.data.fields["System.Title"],
                 "State":data.data.fields["System.State"],
                 "DateStart":date_started,
@@ -379,7 +387,7 @@ export default {
                 "RequestCategory":data.data.fields["Custom.MSOLRequestType"],
                 "PageType":data.data.fields["Custom.PageType"],
                 "RequestType":data.data.fields["Custom.MSOLPlatform"],
-                "Classification":"Transactional",
+                "Classification":classification,
                 "TImeSpent": data.data.fields["Custom.MSOLActualEffort"],
                 "ServiceRating":Computations.serviceRatingComputation(data.data.fields["Custom.MSOLActualEffort"],24),
               }
@@ -402,6 +410,7 @@ export default {
           let id = 0
           let main_category_id = 0
           let main_category_text = ""
+          let classificationID = 0
 
           if(this.azure_work_items[ticket].RequestCategory == "Create New Page"){
             if(this.azure_work_items[ticket].PageType == "PDPs"){
@@ -452,7 +461,8 @@ export default {
                             adjusted_Service_Level_Agreement:0,
                             classification_ID :this.getClassificationID(this.azure_work_items[ticket].Classification),
                             complexity_ID : this.getComplexityID(this.azure_work_items[ticket].Complexity),
-                            period_ID :SparrowService.pickPeriod(this.$store.state.periods[0],this.azure_work_items[ticket].DateCompleted),
+                            //period_ID :SparrowService.pickPeriod(this.$store.state.periods[0],this.azure_work_items[ticket].DateCompleted),
+                            period_ID :14,
                             main_Category_ID : this.getMainCategoryID(main_category_text),
                             sub1_Category_ID : sub1_id,
                             quality_Rating_ID :this.getQualityID(this.azure_work_items[ticket].QualityRating),
@@ -460,7 +470,8 @@ export default {
                             requester:null,
                             ticket_Owner_ID :this.$store.state.userID,
                             ticket_Status_ID : this.$store.state.completedID,
-                            fy_ID: this.getFYID(this.azure_work_items[ticket].FY),
+                            //fy_ID: this.getFYID(this.azure_work_items[ticket].FY),
+                            fy_ID: 8,
                             running_time:null
                         })
                       }),

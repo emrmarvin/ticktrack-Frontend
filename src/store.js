@@ -270,7 +270,13 @@ export default new Vuex.Store({
       }, teamid) {
          SparrowService.getTicketComplexitiesbyTeam(teamid)
             .then(response => {
-               commit('SET_TICKETCOMPLEXITIESBYTEAM', response.data)
+               // console.log("response.data", response.data)
+               // for (var p = 0; p < response.data.length; p++) {
+               //    if (response.data[p].active == 1) {
+               //       state.complexitiesByTeam.push(response.data[p])
+               //    }
+               // }
+              commit('SET_TICKETCOMPLEXITIESBYTEAM', response.data)
             })
             .catch(error => {
                
@@ -360,7 +366,12 @@ export default new Vuex.Store({
             .then(response => {
                for (var p = 0; p < response.data.length; p++) {
                   if (response.data[p].active == true) {
-                     state.activeFY = response.data[p]
+                    state.activeFY = response.data[p]
+                  //    state.activeFY = {
+                  //       "id": 8,
+                  //       "label": "FY24",
+                  //       "active": false
+                  //   }
                   }
                }
                arrangeFY = response.data.sort(function (a, b) {
@@ -655,6 +666,7 @@ export default new Vuex.Store({
                state.runningTickets = []
                for (let i = 0; i < response.data.length; i++) {
                   state.ticket_loader = false
+                  
                   if (response.data[i].ticket_Status.status.toLowerCase() == "in-progress" ||
                      response.data[i].ticket_Status.status.toLowerCase() == "in progress" ||
                      response.data[i].ticket_Status.status.toLowerCase() == "started" ||
@@ -773,7 +785,7 @@ export default new Vuex.Store({
                if (token) {
                   graphService.getUserInfo(token).then(
                      (data) => {
-                        SparrowService.getUserInfo(data.mail)
+                        SparrowService.getUserInfo(data.mail) //data.mail
                            .then(response => {
                               commit("GET_USER_INFO", response.data)      
                                  dispatch({type:'fetchUserTickets', UserId:response.data[0].id,FY:state.activeFY.label})
@@ -1122,13 +1134,25 @@ export default new Vuex.Store({
          state.fiscalYears.push(fy)
       },
       SET_TICKETMAINCATEGORY(state, main_Categories) {
+         for(var i = 0; i < main_Categories.length; i++){
+            if(main_Categories[i].description == "Deleted"){
+               main_Categories.splice(i, 1)
+            }
+         }
          state.main_Categories.push(main_Categories)
       },
       SET_QUALITYRATINGS(state, quality_ratings) {
          state.qualityRatings.push(quality_ratings)
       },
       SET_TICKETMAINCATEGORY_BY_TEAM(state, main_category_by_team) {
-         state.main_Categories_by_team.push(main_category_by_team)
+         var main_cat = []
+         for(var i = 0; i < main_category_by_team.length; i++){
+            if(main_category_by_team[i].description != "Deleted"){
+               main_cat.push(main_category_by_team[i])
+            }
+         }
+         state.main_Categories_by_team.push(main_cat)
+         
       },
       SET_TICKETSUB1CATEGORY(state, sub1_Categories) {
          state.sub1_Categories.push(sub1_Categories)
